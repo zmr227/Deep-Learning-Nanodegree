@@ -461,3 +461,4 @@ def cross_entropy2(Y, P):
 
 - Take your data --> Pick a random model --> Calculate error --> Minimize error and obtain a better model
 - **Calculate Error Function**: 
+- 
