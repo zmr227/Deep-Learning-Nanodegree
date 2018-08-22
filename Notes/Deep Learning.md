@@ -18,8 +18,7 @@
 **Generative Adversarial Networks ( GANs ) :**   One of the newest and most exciting deep learning architectures, showing incredible capacity for understanding real-world data and can be used for generating images. 
 【 [CycleGAN](https://github.com/junyanz/CycleGAN) project】【Generate Novel Human Faces】 
 
-**Deep Reinforcement Learning**:  Use deep neural networks to design agents that can learn to take actions in a simulated environment and then apply it to complex control tasks like video games and robotics. 
-【Teaching a Quadcopter how to Fly】 
+**Deep Reinforcement Learning**:  Use deep neural networks to design agents that can learn to take actions in a simulated environment and then apply it to complex control tasks like video games and robotics【Teaching Quadcopter how to Fly】 
 
 
 
