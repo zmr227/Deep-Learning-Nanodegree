@@ -6,23 +6,23 @@
 
 ### 1.1 Program Structure:
 
-**Neural Networks:**   Learn how to build and train a simple neural network from scratch using python
+- **Neural Networks:**   Learn how to build and train a simple neural network from scratch using python
 
-【Build your First Neural Network ( predict bike rental ) 】 
+【Build your First Neural Network -- predict bike rental 】 
 
-**Convolutional Networks:**  Detect and identify objects in images. 
+- **Convolutional Networks:**  Detect and identify objects in images. 
 
-【Object Recognition — Dog Breed Classifier】 
+【Object Recognition -- Dog Breed Classifier】 
 
-**Recurrent Neural Networks ( RNNs ):**  Particularly well suited to data that forms sequences like text, music, and time series data.
+- **Recurrent Neural Networks ( RNNs ):**  Particularly well suited to data that forms sequences like text, music, and time series data.
 
 【implement [Word2Vec](https://en.wikipedia.org/wiki/Word2vec) model】【Generate TV scripts】 
 
-**Generative Adversarial Networks ( GANs ) :**   One of the newest and most exciting deep learning architectures, showing incredible capacity for understanding real-world data and can be used for generating images. 
+- **Generative Adversarial Networks ( GANs ) :**   One of the newest and most exciting deep learning architectures, showing incredible capacity for understanding real-world data and can be used for generating images. 
 
 【 [CycleGAN](https://github.com/junyanz/CycleGAN) project】【Generate Novel Human Faces】 
 
-**Deep Reinforcement Learning**:  Use deep neural networks to design agents that can learn to take actions in simulated environment and then apply it to complex control tasks like video games and robotics.
+- **Deep Reinforcement Learning**:  Use deep neural networks to design agents that can learn to take actions in simulated environment and then apply it to complex control tasks like video games and robotics.
 
 【Teaching Quadcopter how to Fly】 
 
@@ -30,7 +30,7 @@
 
 ### 1.2  Applying Deep Learning
 
-**Related DL Project Examples: ** Style Transfer；Deep Traffic ( Reinforcement Learning)；Flappy Bird 
+**Related DL Project Examples**:  Style Transfer；Deep Traffic ( Reinforcement Learning)；Flappy Bird 
 
 **Books to read：**
 
