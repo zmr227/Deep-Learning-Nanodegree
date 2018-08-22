@@ -94,6 +94,8 @@
 
 
 
+
+
 ### **1.4  Jupyter Notebook**
 
 **Jupyter** comes from the combination of Julia, Python, and R.
@@ -125,7 +127,7 @@ When saving the notebook, it's written to the server as a JSON file with a .ipyn
 - **Math Expression:**  To start math mode, wrap the **LaTeX** in dollar signs $y = mx + b$ for inline math. For a math block, use double dollar signs to enclose. ( About LaTeX: [please read this primer](http://data-blog.udacity.com/posts/2016/10/latex-primer/) ) 
 - **Code:**  'inline code’ or create a ''' code block '''. 
 
-A cheatsheet for Markdown:  <https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet> 
+  A cheatsheet for Markdown:  <https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet> 
 
 
 
