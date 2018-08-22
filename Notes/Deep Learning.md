@@ -49,29 +49,31 @@
 
 #### **General Commands**
 
-- **Create a new project：**type in “conda create -n project_name python=3” in terminal. 
+- **Create a new project:** type in `conda create -n project_name python=3` in terminal. 
 
-- **Activate project: “**source activate project_name” 
+- **Activate project: ** `source activate project_name`
 
-- **See package installed:**  “conda list” 
+- **See package installed:**  `conda list`
 
-- **If not sure exact package name:** “conda search *possible_name*" 
+- **If not sure exact package name:** `conda search *possible_name*`
 
-- **Install numpy, pandas** **and matplotlib**: "conda install numpy pandas matplotlib”   or "conda install  pandas matplotlib"  ( numpy is a dependency of pandas,  "install pandas" == "install numpy pandas" )
+- **Install numpy, pandas** **and matplotlib**: `conda install numpy pandas matplotlib`  or `conda install pandas matplotlib`  ( numpy is a dependency of pandas )
 
   --> Conda makes sure to also install any packages that are required by the package you're installing. 
 
-- **install Jupyter Notebook:**  “conda install jupyter notebook” 
+- **install Jupyter Notebook:**  `conda install jupyter notebook`
 
-- **Deactivete project**: “source deactivate"
+- **Deactivete project**: `source deactivate`
 
-- **Saving environment:**  "conda env export > environment_name.yaml"
+- **Saving environment:**  `conda env export > environment_name.yaml`
 
-- Loading environment from an environment file (.yaml) : "conda env create -f environment.yaml” (project name e will be "environment") 
+- **Loading environment from an environment file (.yaml)** :`conda env create -f environment.yaml` (project name will be "environment") 
 
-- **Listing all environments:**  “conda env list"
+- **Listing all environments:**  `conda env list`
 
-- **Remove environment:**  "conda env remove -n env_name”re 
+- **Remove environment:**  `conda env remove -n env_name`
+
+  
 
 **e.g.** Create an environment named data installed with Python 3.6, numpy, and pandas: 
 
@@ -452,4 +454,3 @@ def cross_entropy2(Y, P):
 
 - Take your data --> Pick a random model --> Calculate error --> Minimize error and obtain a better model
 - Calculate Error Function: 
-
