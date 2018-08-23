@@ -383,7 +383,8 @@ def trainPerceptronAlgorithm(X, y, learn_rate = 0.01, num_epochs = 25):
 
 #### Sigmoid vs Softmax
 
-- **Exponential function** (Exp) will return a positive number for any input, so it's helpful when there's any  negative scores.
+- **Exponential function**: exp( )  will return a positive number for any input, so it's helpful when there's any  negative scores.
+- **Sigmoid function**: turns any number into something between 0 and 1.
 - Softmax value for N = 2 is the same as the sigmoid function.
 
 
@@ -460,5 +461,99 @@ def cross_entropy2(Y, P):
 #### Logistic Regression
 
 - Take your data --> Pick a random model --> Calculate error --> Minimize error and obtain a better model
-- **Calculate Error Function**: 
-- 
+
+- **Calculate Error Function**: Our Goal is to Minimize the Error Function. (using **Gradient Descent**)
+
+  ![Error-Function](images/error-func.png)
+
+  ![Error-Function-Formula](images/error-func-formula.png)
+
+  
+
+  
+
+#### Gradient Descent:  
+
+- Closer/Further the label is to the prediction, Smaller/Larger the gradient. Thus, we tell which direction to move toward by calculating gradient.
+- A small gradient means we'll change our coordinates by a little bit, and a large gradient means we'll change our coordinates by a lot.
+- **Gradient Descent Step**: subtracting a multiple of the gradient of the error function at every point, then updates the weights and bias.
+
+![Psedocode](images/gradient-descent-psedocode.png)
+
+```python
+# Implement the following functions
+
+import numpy as np
+
+# Activation (sigmoid) function
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+# Output (prediction) formula
+def output_formula(features, weights, bias):
+    pred = np.matmul(features, weights) + bias
+    return sigmoid(pred)
+
+# Error (log-loss) formula
+def error_formula(y, output):
+    return -y * np.log(output) - (1 - y) * np.log(1 - output)
+
+# Gradient descent step
+def update_weights(x, y, weights, bias, learnrate):
+    output = output_formula(x, weights, bias)
+    error = y - output
+    weights += learnrate * error * x
+    bias += learnrate * error
+    return weights, bias
+```
+
+
+
+#### Perceptron vs Gradient Descent
+
+- In perceptron Algorithm, only misclassified points will change weights to get the line closer to it and the correctly classified points will do nothing. 
+
+- While in GD, every point will change the weights, the correct points will ask the line to go further away.
+
+- In Gradient Descent, y_hat can be any number between 0 and 1, but in Perceptron it can only be 0 or 1.
+
+  ![Comparation](images/perceptron-vs-GD.png)
+
+
+
+#### Neural Network Architecture
+
+- **Non-Linear Models**: for the data which is not separable with a line, create a non-linear probability function to separate different regions. (combine two linear models --> one non-linear model)
+
+- **Combine Models**:
+
+  ![Combine](images/combine-regions.png)
+
+- **Example**: in the graph below, weights on the left represents the equation of previous linear model, weights on the right shows the linear combination of the two models.
+
+  ![NN-Architecture](images/nn-simple.png)
+
+  
+
+- **Neural Network Architecture**: consists of layers. ( Input --> Hidden --> Output ) 
+
+  In general, if there's n nodes in the input layer, we'll consider the model in n-dimensional space.
+
+  - **Input Layers**: contains the inputs.
+
+  - **Hidden Layers**: a set of linear models created from the input layer.
+
+  - **Output Layers**: where the linear model get combined to obtain a non-linear model. (If there's more than 1 outputs --> **Multiclass Classification Model**)
+
+  ![NN-Architecture](images/nn-arch.png)
+
+- **Deep Neural Network**: contains more layers. We can do combination multiple times to obtain highly complex models with lots of hidden layers. 
+
+  - Linear models combine to create non-linear models, and then these non-linear models combines to create even more non-linear models.
+  - NN will split the n-dimensional space with a highly non-linear boundary.
+
+  ![Deep-NN](images/deep-nn-arch.png)
+
+- Multiclass Classification Model:
+
+  
