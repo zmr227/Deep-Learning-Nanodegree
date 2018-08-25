@@ -30,7 +30,7 @@
 
 ### 1.2  Applying Deep Learning
 
-**Related DL Project Examples**:  Style Transfer；Deep Traffic ( Reinforcement Learning)；Flappy Bird 
+**Related DL Project Examples**:  Style Transfer；Deep Traffic (Reinforcement Learning)；Flappy Bird 
 
 **Books to read：**
 
@@ -293,7 +293,7 @@ When saving the notebook, it's written to the server as a JSON file with a .ipyn
 
 
 - **Higher Dimensions**  (If it's 3 dimensional, separate with a plane)
-  ![n-dimensional](images/classify-2.png)
+![n-dimensional](images/classify-2.png)
 
 
 
@@ -301,11 +301,11 @@ When saving the notebook, it's written to the server as a JSON file with a .ipyn
 
 - Why it's called Neural Network: perceptrons look like the neurals in the brain.
 
-  ![Perceptron](images/perceptron.png) 
+![Perceptron](images/perceptron.png) 
 
 - AND perceptron, OR perceptron, NOT perceptron, XOR perceptron ( XOR returns true only when one of the inputs is true and the other is false; NAND refers to NOT + AND ). 
 
-  ![XOR](images/xor.png)
+![XOR](images/xor.png)
 
 #### Perceptron Trick
 
@@ -464,9 +464,9 @@ def cross_entropy2(Y, P):
 
 - **Calculate Error Function**: Our Goal is to Minimize the Error Function. (using **Gradient Descent**)
 
-  ![Error-Function](images/error-func.png)
+![Error-Function](images/error-func.png)
 
-  ![Error-Function-Formula](images/error-func-formula.png)
+![Error-Function-Formula](images/error-func-formula.png)
 
   
 
@@ -517,7 +517,7 @@ def update_weights(x, y, weights, bias, learnrate):
 
 - In Gradient Descent, y_hat can be any number between 0 and 1, but in Perceptron it can only be 0 or 1.
 
-  ![Comparation](images/perceptron-vs-GD.png)
+![Comparation](images/perceptron-vs-GD.png)
 
 
 
@@ -527,15 +527,17 @@ def update_weights(x, y, weights, bias, learnrate):
 
 - **Combine Models**:
 
-  ![Combine](images/combine-regions.png)
+![Combine](images/combine-regions.png)
 
 - **Example**: in the graph below, weights on the left represents the equation of previous linear model, weights on the right shows the linear combination of the two models.
 
-  ![NN-Architecture](images/nn-simple.png)
+![NN-Architecture](images/nn-simple.png)
 
   
 
-- **Neural Network Architecture**: consists of layers. ( Input --> Hidden --> Output ) 
+- **Neural Network Architecture**: NN takes the input vector and then apply a sequense of linear models and sigmoid functions, then combine them into a highly non-linear map. 
+
+  NN consists of layers. ( Input --> Hidden --> Output ) 
 
   In general, if there's n nodes in the input layer, we'll consider the model in n-dimensional space.
 
@@ -545,15 +547,101 @@ def update_weights(x, y, weights, bias, learnrate):
 
   - **Output Layers**: where the linear model get combined to obtain a non-linear model. (If there's more than 1 outputs --> **Multiclass Classification Model**)
 
-  ![NN-Architecture](images/nn-arch.png)
+![NN-Architecture](images/nn-arch.png)
 
-- **Deep Neural Network**: contains more layers. We can do combination multiple times to obtain highly complex models with lots of hidden layers. 
+- **Deep Neural Network**: NN that contains more layers. We can do combination multiple times to obtain highly complex models with lots of hidden layers. 
 
   - Linear models combine to create non-linear models, and then these non-linear models combines to create even more non-linear models.
   - NN will split the n-dimensional space with a highly non-linear boundary.
 
-  ![Deep-NN](images/deep-nn-arch.png)
+![Deep-NN](images/deep-nn-arch.png)
 
-- Multiclass Classification Model:
+- **Multiclass Classification Model**: add more nodes in the output layer and each one will provide the probability that the image is A, B, C .... Then apply SoftMax function to the scores provided to obtain well-defined probabilities.
+
+![Example](images/multi-class-classification.png)
 
   
+
+#### Feedforward
+
+- Train NN: figure out what parameter should be placed on the edges in order to model the data well.
+
+- **Feedforward** is the process neural networks use to turn the input into an output (y_hat). 
+
+![feedforward](images/feedforward.png)
+
+- **Error Function**: gives a measure of how badly a point gets misclassified. ( It will be measuring how far the point is from the line if it's misclassified and error will be very small if it's correctly classified. )
+
+
+
+#### Backpropagation
+
+- In a nutshell, backpropagation will consist of:
+
+  - Doing a feedforward operation.
+
+  - Comparing the output of the model with the desired output.
+
+  - Calculating the error.
+
+  - Running the feedforward operation backwards (backpropagation) to spread the error to each of the weights. (increase weights of model and reduce weights of those )
+
+  - Use this to update the weights, and get a better model both in the hidden layer and output layer.
+
+  - Continue until we get a model that is good enough.
+
+![backpropagation](images/backpropagation.png)
+
+- **Calculating the Gradient**:
+
+![Calculate](images/gradient-calculate.png)
+
+![Calculate](images/multiclass-gradient-calculate.png)
+
+![Calculate](images/backpropagation-calculate.png)
+
+
+
+### 2.2  Implementing Gradient Descent
+
+#### Sum of Squared Error (SSE)
+
+- The square ensures the error is always positive and larger errors (outliers) are penalized more than smaller errors. Also, it makes the math nice, always a plus.
+- **variable *j***: represents the output units of the network. So the inside sum is saying for each output unit, find the difference between the true value y and the predicted value y_hat, then square the difference and sum up all those squares. 
+-  **variable *μ***: the other sum over μ is a sum over all the data points. For each data point, calculate the inner sum of the squared differences for each output unit. Then sum up those squared differences of each data points. That gives us the overall error for all the output predictions for all data points.
+
+- Since the output of a neural network (prediction) depends on the weights, so it can also be written as the second equation, and the 1/2 here is added to help clean the math later:
+
+![SSE-formula2](images/sse-math.png)
+
+
+
+#### Gradient Descent
+
+- Our goal is to find weights *Wij* that minimize the squared error *E*. --> Gradient Descent. 
+- Since the steps taken should be in the direction that minimizes error the most. We can find this direction by calculating *gradient* of the squared error. (**Gradient **is another term for rate of change or slope.)
+- **Calculating Gradient**: The gradient is just a derivative generalized to functions with more than one variable. We can use calculus to find the gradient at any point in error function, which depends on the input weights. ( A derivative of a function *f(x)* returns the slope of *f(x)* at point x. )
+- **Local Minima**: If the weights are initialized with the wrong values, gradient descent could lead the weights into a local minimum where the error is low, but not the lowest. (To avoid this, try [momentum](http://sebastianruder.com/optimizing-gradient-descent/index.html#momentum).)
+
+
+
+#### Math for Gradient Descent
+
+![math](images/gradient-math0.png)
+
+![math](images/gradient-math1.png)
+
+![chain-rule](images/chain-rule.png)
+
+![math](images/gradient-math2.png)
+
+![math](images/gradient-math3.png)
+
+![math](images/gradient-math4.png)
+
+![math](images/gradient-math5.png)
+
+
+
+#### Code for Gradient Descent
+
