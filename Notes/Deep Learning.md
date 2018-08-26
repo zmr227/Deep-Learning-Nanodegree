@@ -1,5 +1,7 @@
 
 
+
+
 # Deep Learning
 
 ## Chapter 1.  Introduction to Deep Learning
@@ -549,7 +551,7 @@ def update_weights(x, y, weights, bias, learnrate):
 
 ![NN-Architecture](images/nn-arch.png)
 
-- **Deep Neural Network**: NN that contains more layers. We can do combination multiple times to obtain highly complex models with lots of hidden layers. 
+- **Deep Neural Network**: NN that contains more layers. We can do combination multiple times to obtain highly complex models with lots of hidden layers. (deep stack of hidden layers)
 
   - Linear models combine to create non-linear models, and then these non-linear models combines to create even more non-linear models.
   - NN will split the n-dimensional space with a highly non-linear boundary.
@@ -576,8 +578,12 @@ def update_weights(x, y, weights, bias, learnrate):
 
 #### Backpropagation
 
-- In a nutshell, backpropagation will consist of:
+- Error for units is proportional to the error in the output layer times the weight between the units.
+- We can flip the network over, use the error as input and keep propagating errors through the layers.
 
+![backpropagation](images/backpropagation-1.png)
+
+- In a nutshell, backpropagation will consist of:
   - Doing a feedforward operation.
 
   - Comparing the output of the model with the desired output.
@@ -616,12 +622,46 @@ def update_weights(x, y, weights, bias, learnrate):
 
 
 
+#### Mean Squared Error (MSE)
+
+- When the dataset is large, summing up all the weight steps can lead to really large updates that make the gradient descent diverge.
+- To compensate for this, we'll need to use a quite small learning rate or just divide by the number of records (m) in our dataset to take the average.
+
+![MSE-formula](images/MSE.png)
+
+
+
 #### Gradient Descent
 
 - Our goal is to find weights *Wij* that minimize the squared error *E*. --> Gradient Descent. 
+
 - Since the steps taken should be in the direction that minimizes error the most. We can find this direction by calculating *gradient* of the squared error. (**Gradient **is another term for rate of change or slope.)
-- **Calculating Gradient**: The gradient is just a derivative generalized to functions with more than one variable. We can use calculus to find the gradient at any point in error function, which depends on the input weights. ( A derivative of a function *f(x)* returns the slope of *f(x)* at point x. )
+
+- **Calculating Gradient**: The gradient is a derivative generalized to functions with more than one variable. We can use calculus to find the gradient at any point in error function, which depends on the input weights. ( A derivative of a function *f(x)* returns the slope of *f(x)* at point x. )
+
 - **Local Minima**: If the weights are initialized with the wrong values, gradient descent could lead the weights into a local minimum where the error is low, but not the lowest. (To avoid this, try [momentum](http://sebastianruder.com/optimizing-gradient-descent/index.html#momentum).)
+
+- **Activation function f(h)** : `h=∑wixi`, If we use sigmoid as `f(h)`, gradient'll be `f'(h) = f(h)*(1-f(h))`
+
+- **Data Clean-up**: one-hot encoding, standardize data (scale the values such that they have mean of zero and a standard deviation of 1) 
+
+  - Standardize will be necessary because the sigmoid function squashes really small and really large inputs. Gradient of really small and large inputs is zero, which means the gradient descent step will go to zero too.
+
+- **Initialize weights**: initialize the weights from a normal distribution centered at 0, n is the number of input units. 
+
+    - This scale keeps the input to the sigmoid low for increasing numbers of input units. 
+    - It's also important to initialize them randomly so that they all have different starting values and diverge, breaking symmetry. 
+
+    ```python
+    weights = np.random.normal(scale=1/n_features**.5, size=n_features)
+    ```
+
+- **Update Weights**:
+
+  - Set the weight step to zero: **Δwi=0**
+  - For each record of data: Make a forward pass through the network; calculating the output y_hat; Calculate error term for the output unit; Update the weight step **Δwi=Δwi+δxi**.
+  - Update the weights wi=wi+ηΔwi/m. η is the learning rate and m is the number of records. Here we're averaging the weight steps to help reduce any large variations in the training data.
+  - Repeat for e epochs.
 
 
 
@@ -644,4 +684,213 @@ def update_weights(x, y, weights, bias, learnrate):
 
 
 #### Code for Gradient Descent
+
+- Basic Code:
+
+```python
+import numpy as np
+from data_prep import features, targets, features_test, targets_test
+
+# Defining the sigmoid function for activations
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
+
+# Use to same seed to make debugging easier
+np.random.seed(42)
+
+n_records, n_features = features.shape
+last_loss = None
+
+# Initialize weights
+weights = np.random.normal(scale=1 / n_features**.5, size=n_features)
+
+# Neural Network hyperparameters
+epochs = 1000
+learnrate = 0.5
+
+for e in range(epochs):
+    del_w = np.zeros(weights.shape)
+    for x, y in zip(features.values, targets):
+    	# Loop through all records, x is the input, y is the target
+
+        # Activation of the output unit
+        #   Notice we multiply the inputs and the weights here 
+        #   rather than storing h as a separate variable 
+        output = sigmoid(np.dot(x, weights))
+
+        # The error, the target minus the network output
+        error = y - output
+
+        # The error term
+        #   Notice we calulate f'(h) here instead of defining a separate
+        #   sigmoid_prime function. This just makes it faster because we
+        #   can re-use the result of the sigmoid function stored in
+        #   the output variable
+        error_term = error * output * (1 - output)
+
+        # The gradient descent step, the error times the gradient times the inputs
+        del_w += error_term * x
+
+    # Update the weights here. The learning rate times the 
+    # change in weights, divided by the number of records to average
+    weights += learnrate * del_w / n_records
+	
+    # Printing out the mean square error on the training set
+    if e % (epochs / 10) == 0:
+        out = sigmoid(np.dot(features, weights))
+        loss = np.mean((out - targets) ** 2)
+        if last_loss and last_loss < loss:
+            print("Train loss: ", loss, "  WARNING - Loss Increasing")
+        else:
+            print("Train loss: ", loss)
+        last_loss = loss
+     
+    
+# Calculate accuracy on test data
+tes_out = sigmoid(np.dot(features_test, weights))
+predictions = tes_out > 0.5
+accuracy = np.mean(predictions == targets_test)
+print("Prediction accuracy: {:.3f}".format(accuracy))
+```
+
+- Multilayer Perceptrons:
+
+```python
+import numpy as np
+
+def sigmoid(x):
+    """
+    Calculate sigmoid
+    """
+    return 1/(1+np.exp(-x))
+
+# Network size
+N_input = 4
+N_hidden = 3
+N_output = 2
+
+np.random.seed(42)
+# Make some fake data
+X = np.random.randn(4)
+
+weights_input_to_hidden = np.random.normal(0, scale=0.1, size=(N_input, N_hidden))
+weights_hidden_to_output = np.random.normal(0, scale=0.1, size=(N_hidden, N_output))
+
+
+# TODO: Make a forward pass through the network
+
+hidden_layer_in = np.dot(X, weights_input_to_hidden)
+hidden_layer_out = sigmoid(hidden_layer_in)
+
+print('Hidden-layer Output:')
+print(hidden_layer_out)
+
+output_layer_in = np.dot(hidden_layer_out, weights_hidden_to_output)
+output_layer_out = sigmoid(output_layer_in)
+
+print('Output-layer Output:')
+print(output_layer_out)
+```
+
+
+
+#### Implementing Backpropagation:
+
+General algorithm for updating the weights with backpropagation:
+
+![backpropagation-algorithm](images/implement-backpropagation-1.png)
+
+![error-term-formula](images/implement-backpropagation.png)
+
+```python
+import numpy as np
+from data_prep import features, targets, features_test, targets_test
+
+np.random.seed(21)
+
+def sigmoid(x):
+    """
+    Calculate sigmoid
+    """
+    return 1 / (1 + np.exp(-x))
+
+
+# Hyperparameters
+n_hidden = 2  # number of hidden units
+epochs = 900
+learnrate = 0.005
+
+n_records, n_features = features.shape
+last_loss = None
+# Initialize weights
+weights_input_hidden = np.random.normal(scale=1 / n_features ** .5,
+                                        size=(n_features, n_hidden))
+weights_hidden_output = np.random.normal(scale=1 / n_features ** .5,
+                                         size=n_hidden)
+
+for e in range(epochs):
+    del_w_input_hidden = np.zeros(weights_input_hidden.shape)
+    del_w_hidden_output = np.zeros(weights_hidden_output.shape)
+    for x, y in zip(features.values, targets):
+        ## Forward pass ##
+        # TODO: Calculate the output
+        hidden_input = np.dot(x, weights_input_hidden)
+        hidden_output = sigmoid(hidden_input)
+
+        output = sigmoid(np.dot(hidden_output,
+                                weights_hidden_output))
+
+        ## Backward pass ##
+        # TODO: Calculate the network's prediction error
+        error = y - output
+
+        # TODO: Calculate error term for the output unit
+        output_error_term = error * output * (1 - output)
+
+        ## propagate errors to hidden layer
+
+        # TODO: Calculate the hidden layer's contribution to the error
+        hidden_error = np.dot(output_error_term, weights_hidden_output)
+
+        # TODO: Calculate the error term for the hidden layer
+        hidden_error_term = hidden_error * hidden_output * (1 - hidden_output)
+
+        # TODO: Update the change in weights
+        del_w_hidden_output += output_error_term * hidden_output
+        del_w_input_hidden += hidden_error_term * x[:, None]
+
+    # TODO: Update weights
+    weights_input_hidden += learnrate * del_w_input_hidden / n_records
+    weights_hidden_output += learnrate * del_w_hidden_output / n_records
+
+    # Printing out the mean square error on the training set
+    if e % (epochs / 10) == 0:
+        hidden_output = sigmoid(np.dot(x, weights_input_hidden))
+        out = sigmoid(np.dot(hidden_output,
+                             weights_hidden_output))
+        loss = np.mean((out - targets) ** 2)
+
+        if last_loss and last_loss < loss:
+            print("Train loss: ", loss, "  WARNING - Loss Increasing")
+        else:
+            print("Train loss: ", loss)
+        last_loss = loss
+
+# Calculate accuracy on test data
+hidden = sigmoid(np.dot(features_test, weights_input_hidden))
+out = sigmoid(np.dot(hidden, weights_hidden_output))
+predictions = out > 0.5
+accuracy = np.mean(predictions == targets_test)
+print("Prediction accuracy: {:.3f}".format(accuracy))
+
+```
+
+
+
+
+
+#### Making a column vector
+
+- By default NumPy arrays work like row vectors, if we need row vector, use `array.T` for its transpose. - 
+- However, for a 1D array, the transpose will still return a row vector. Instead, use `array[:,None]`  or `np.array(features, ndmin=2).T` to create a column vector.
 
