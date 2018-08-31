@@ -376,7 +376,7 @@ def trainPerceptronAlgorithm(X, y, learn_rate = 0.01, num_epochs = 25):
 #### Error Function
 
 - **Error function**: tells the model how far it is from the ideal solution, then the model will continuously take steps to minimize the error.
--  Minimizing error func leads to the best possible solution. (sometimes a local minimum is good enough)
+-  Minimizing error func leads to the best possible solution. (sometimes a local minima is good enough)
 - To use **Gradient Descent **, error function should be continuous and differentiable so as to be sensitive to any tiny changes since there's a small learning rate.
 - **Log-loss** Error Function: Assign a large penalty to the misclassified points and a small penalty to the correctly classified points. Error = sum of penalties --> move around to decrease error.
 - (Penalty --> distance from the boundary for the misclassified points)   
@@ -641,7 +641,10 @@ def update_weights(x, y, weights, bias, learnrate):
 
 - **Local Minima**: If the weights are initialized with the wrong values, gradient descent could lead the weights into a local minimum where the error is low, but not the lowest. (To avoid this, try [momentum](http://sebastianruder.com/optimizing-gradient-descent/index.html#momentum).)
 
-- **Activation function f(h)** : `h=∑wixi`, If we use sigmoid as `f(h)`, gradient'll be `f'(h) = f(h)*(1-f(h))`
+- **Activation function f(h)** :
+
+    - A func that takes input signal and generates an output signal, but takes the threshold into account.
+    -  `h=∑wixi`, If we use sigmoid as `f(h)`, gradient'll be `f'(h) = f(h)*(1-f(h))`
 
 - **Data Clean-up**: one-hot encoding, standardize data (scale the values such that they have mean of zero and a standard deviation of 1) 
 
@@ -753,7 +756,7 @@ accuracy = np.mean(predictions == targets_test)
 print("Prediction accuracy: {:.3f}".format(accuracy))
 ```
 
-- Multilayer Perceptrons:
+- **Multilayer Perceptrons**:
 
 ```python
 import numpy as np
@@ -887,10 +890,125 @@ print("Prediction accuracy: {:.3f}".format(accuracy))
 
 
 
-
-
 #### Making a column vector
 
 - By default NumPy arrays work like row vectors, if we need row vector, use `array.T` for its transpose. - 
 - However, for a 1D array, the transpose will still return a row vector. Instead, use `array[:,None]`  or `np.array(features, ndmin=2).T` to create a column vector.
 
+
+
+### 2.3 Training Neural Networks
+
+#### Overfitting and Underfitting
+
+- **Overfitting**: 
+  - overcomplicated model which is too specific, fail to generalize. 
+  - Does well in training set but tend to memorize training data instead of learning its characteristics. 
+  - Error due to variance.
+- **Underfitting**:
+  - model too simple to fit the data.
+  - Does not do well in the training set. 
+  - Error due to bias.
+- **Model Selection**:
+  - Choose the simple model that does the job instead of the complex one that does a little better.
+  - If there's no "good" model, pick an overly complicated model and apply certain technique to prevent overfitting on it.
+- **Tech to prevent Overfitting**: Early stopping, Regularization, Dropout
+
+
+
+#### Early Stopping
+
+- Training error is always decreasing as we train the model, it keeps fitting the training data better.
+- Testing error is large when underfitting, then it decrease when the model generalize well until it get to the minium point. ( **the Goldilocks spot** ) Once pass this spot, the model overfits and stop generalizing.
+- **Model Complexity Graph**: 
+  - Do GD until testing error stops decreasing and starts to increase. <u>Stop training at that moment</u>.
+  - helps determine the # of epochs we should use. (# of epochs reflects model complexity)
+
+![Graph](images/model-complexity-graph.png)
+
+
+
+#### Regularization ( L1, L2 )
+
+- Error is smaller if the prediction is closer to the actual label. The bad model provides better prediction:
+
+![activation-function](images/activation-func-0.png)
+
+- **Regularization**: punish high coefficients by adding a term to the previous error function, which is big when there's large weights. (constant lambda --> how much to penalize the coefficients)
+
+![regularization](images/regularization.png)
+
+- **L1** **Regularization**: 
+  - Small weights tend to go to 0. Reduce weights and end up with a small set. 
+  - Usually used to <u>select important features</u> and turn the rest into zeros.
+- **L2** **Regularization**: 
+  - Try to maintain all weights homogeneously small --> smaller sum of squares --> smaller error func.
+  - <u>Normally gives a better results</u> for training models. (Used the most)
+
+
+
+#### Dropout
+
+- Sometimes part of the network have very large weights and dominates all training. 
+- **Dropout**: As we go through the epochs, randomly turn off some of the nodes (both the feedforward and backpropagation will not use it) and the other nodes will take more part in training. 
+- **Dropout Algorithm**: we'll need to provide a parameter of the probability that each node gets dropped in a particular epoch. 
+
+
+
+#### Problems of GD 
+
+**1. Got stuck in a local minima**.
+
+- **Solutions**:
+
+  - **Random Restart**: start from several random places and do GD from all of them. It can increase the probability of getting to the global minimum. (or at least a pretty good local minimum)
+  - **Momentum**:  The idea is to walk a bit fast with momentum to pass through the local minima to go for a lower minimum. ( Momentum is a constant beta between 0 and 1, those recent steps will matter more and help the model get over the hump. )
+
+  ![momentum](images/momentum.png)
+
+**2.  Vanishing Gradient**:
+
+- **Problem of sigmoid function**: The curve of the sigmoid function gets flat on the sides, so the derivative will be almost zero. This gets worse in multi-layer perceptrons, the product of a bunch of small derivatives will be tiny. 
+
+--> GD will make very tiny changes on weights at each steps and may never get to minimum spot. 
+
+- **Solutions**: 
+
+  - **Change Activation functions**: 
+    - **Hyperbolic Tangent**:  It has a larger range than sigmoid, range(-1, 1), thus larger derivative.
+    - **Rectified Linear Unit (ReLU)**:  It's widely used since it can imporve the training significantly without sacrifice much accuracy.`relu(x) = x if x ≥ 0 else 0`
+
+
+
+#### Stochastic Gradient Descent
+
+- When the dataset is big, GD will require huge matrix computations. 
+- Though Stochastic GD will be less accurate, it can save lots of time and memory space.
+
+- **Steps to Implement**:
+
+1. Split the data into several batches 
+2. Run the first batch through the network 
+3. Calculate error and gradient 
+4. Backpropagate to update weights, get better weights and boundary region.
+5. Repeat until it finish all batches.
+
+
+
+#### Learning Rate Decay
+
+- BIg learning rate --> take huge steps --> fast at the beginning but may miss the minimum.
+
+- Small learning rate --> better chance of reaching local minimum but slow.
+
+- **Rule of thumb**: In general, if the model doesn't work, decrease the learning rate.
+
+- **The best learning rate**: if steep, take long steps; if plain, take small steps. 
+
+  --> learning rate should decrease as the model is getting closer to a solution. 
+
+
+
+### 2.6 Sentiment Analysis
+
+- What NN really does is to search for direct or indirect correlation between two datasets. ( learn to take one and predict the other one)
