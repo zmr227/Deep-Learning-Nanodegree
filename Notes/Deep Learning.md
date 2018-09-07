@@ -1009,6 +1009,260 @@ print("Prediction accuracy: {:.3f}".format(accuracy))
 
 
 
-### 2.6 Sentiment Analysis
+### 2.6 Sentiment Analysis (Project)
 
 - What NN really does is to search for direct or indirect correlation between two datasets. ( learn to take one and predict the other one)
+- Cutting off noise, making the correlation of dataset more obvious for the NN can greatly improve prediction accuracy and training speed, save lots of computation time &power.
+
+
+
+### 2.7 Keras
+
+- Keras requires the input shape to be specified in the first layer, but  it will automatically infer the shape of all other layers. (we only have to explicitly set the input dimensions for the first layer) 
+
+- [Keras Document](https://keras.io/)
+
+- Adding layers: `model.add(Dense(128, activation="softmax", input_dim=100)))`
+
+- Models need to be compiled before it can be run: `model.compile(loss="categorical_crossentropy", optimizer="adam", metrics = ["accuracy"])` 
+
+- see the resulting model architecture: `model.summary()`
+
+- scoring the model: `score = model.evaluate(features, targets)`
+
+- Loading data: 
+
+  - **num_words**: Top most frequent words to consider.  This is useful if you don't want to consider very obscure words such as  "Ultracrepidarian."
+  - **skip_top**: Top words to ignore. This is useful if  you don't want to consider the most common words. For example, the word  "the" would add no information to the review, so we can skip it by  setting `skip_top` to 2 or higher.
+
+  ````python
+  from keras.datasets import imdb
+  (x_train, y_train), (x_test, y_test) = imdb.load_data(path="imdb.npz",
+                                                       num_words=None,
+                                                       skip_top=0,
+                                                       maxlen=None,
+                                                       seed=113,
+                                                       start_char=1,
+                                                       oov_char=2,
+                                                       index_from=3)
+  
+  ````
+
+- Training 
+
+#### Keras Optimizers: 
+
+- [document](https://keras.io/optimizers/), [related blog post](http://ruder.io/optimizing-gradient-descent/index.html#rmsprop)
+- **SGD**: Stochastic Gradient Descent. It uses the following parameters:
+
+  - Learning rate.
+  - Momentum (This takes the weighted average of the previous steps, in  order to get a bit of momentum and go over bumps, as a way to not get  stuck in local minima).
+  - Nesterov Momentum (This slows down the gradient when i
+- **Adam**:  Adaptive Moment Estimation.
+
+  - Adam uses a more complicated exponential decay that consists of not just considering the average (first moment),  but also the variance (second moment) of the previous steps.
+- **RMSProp**:  RMS stands for Root Mean Squared Error.
+  -  decreases learning rate by dividing it by an exponentially decaying average of squared gradients. 
+
+
+
+### 2.8 TensorFlow
+
+- constant tensor: its value never changes.`tf.constant("Hello World!")`
+- Tensorflow Session: is an environment for running a graph.  The session is in charge of allocating the operations to GPU(s) and/or CPU(s), including remote  machines.
+
+
+
+#### Basic functions
+
+- `tf.Variable()`: usually used to define trainable variables, like weights and bias. must be initialized when define.
+
+- `tf.placeholder()`: term parameter, can be initialized later by `session.run(feed_dict)`.
+
+- [`tf.global_variables_initializer()`](https://www.tensorflow.org/api_docs/python/tf/global_variables_initializer) function to initialize the state of all the Variable tensors.
+
+  ```python
+  sess.run(tf.global_variables_initializer())
+  ```
+
+- [`tf.truncated_normal()`](https://www.tensorflow.org/api_docs/python/tf/truncated_normal) function to generate random numbers from a normal distribution whose magnitude is no more than 2 standard deviations from the mean. 
+
+  - choosing weights from a normal distribution prevents any weight overwhelming other weights.
+  - get_weights: `tf.Variable(tf.truncated_normal((n_features, n_labels)))`
+
+- [`tf.zeros()`](https://www.tensorflow.org/api_docs/python/tf/zeros) function returns a tensor with all zeros.
+
+  - get bias: `tf.Variable(tf.zeros(n_labels))`
+
+- [`tf.matmul()`](https://www.tensorflow.org/api_docs/python/tf/matmul) function for matrix multiplication. `tf.add()` for adding matrix.
+
+
+
+#### TensorFlow Softmax
+
+- The softmax function: 
+  - squashes it's inputs (called **logits** or **logit scores**) to be between 0 and 1 and also normalizes the outputs such that they all sum to 1. 
+  - This means the output of softmax function is equivalent to a categorical probability distribution.
+  - It's the perfect function to use as the output activation for a network predicting  multiple classes.
+- [`tf.nn.softmax()`](https://www.tensorflow.org/api_docs/python/tf/nn/softmax) implements the softmax function. It takes in logits and returns softmax activations.
+
+```python
+import tensorflow as tf
+
+def run():
+    output = None
+    logit_data = [2.0, 1.0, 0.1]
+    logits = tf.placeholder(tf.float32)
+    
+    # TODO: Calculate the softmax of the logits
+    softmax = tf.nn.softmax(logits)  
+    
+    with tf.Session() as sess:
+        # TODO: Feed in the logit data
+        output = sess.run(softmax, feed_dict={logits: logit_data})
+
+    return output
+
+```
+
+
+
+#### TensorFlow Cross Entropy
+
+- [`tf.reduce_sum()`](https://www.tensorflow.org/api_docs/python/tf/reduce_sum) function takes an array of numbers and sums them together.
+- [`tf.log()`](https://www.tensorflow.org/api_docs/python/tf/log) takes the natural log of a number.
+
+```python
+import tensorflow as tf
+
+softmax_data = [0.7, 0.2, 0.1]
+one_hot_data = [1.0, 0.0, 0.0]
+
+softmax = tf.placeholder(tf.float32)
+one_hot = tf.placeholder(tf.float32)
+
+# TODO: Print cross entropy from session
+cross_entropy = - tf.reduce_sum(tf.multiply(one_hot, tf.log(softmax)))
+
+with tf.Session() as sess:
+    print(sess.run(cross_entropy, feed_dict={softmax: softmax_data, one_hot: one_hot_data}))
+```
+
+
+
+#### Mini-batching
+
+- training on subsets of the dataset instead of all the data at one time.
+- can't calculate the loss simultaneously across all samples.
+- quite useful combined with SGD. 
+  - Randomly shuffle the data at the start of each epoch, then create the mini-batches. 
+  - For each  mini-batch, you train the network weights with gradient descent. (Since these batches are random, you're performing SGD with each batch)
+- Size of batchs may vary: [`tf.placeholder()`](https://www.tensorflow.org/api_docs/python/tf/placeholder) function to receive the varying batch sizes.
+  - The `None` dimension is a placeholder for the batch size. At runtime, TensorFlow will accept any batch size greater than 0.
+
+```python
+features = tf.placeholder(tf.float32, [None, n_input])
+labels = tf.placeholder(tf.float32, [None, n_classes])
+
+import math
+def batches(batch_size, features, labels):
+    """
+    Create batches of features and labels
+    :param batch_size: The batch size
+    :param features: List of features
+    :param labels: List of labels
+    :return: Batches of (Features, Labels)
+    """
+    assert len(features) == len(labels)
+    # TODO: Implement batching
+    mini_batches = []
+    for start in range(0, len(features), batch_size):
+        end = start + batch_size
+        batch = [features[start: end], labels[start: end]]
+        mini_batches.append(batch)
+    
+    return mini_batches
+```
+
+
+
+#### Epochs
+
+- An epoch is a single forward and backward pass of the whole dataset.   
+- This is used to increase the accuracy of the model without requiring more data.  
+- Lowering the learning rate would require more epochs, but could ultimately achieve better accuracy.
+
+
+
+#### TensorFlow ReLU
+
+- The ReLU function is 0 for negative inputs and x for all inputs x > 0.
+
+```python
+hidden_layer = tf.add(tf.matmul(features, hidden_weights), hidden_biases)
+hidden_layer = tf.nn.relu(hidden_layer)
+
+output = tf.add(tf.matmul(hidden_layer, output_weights), output_biases)
+```
+
+
+
+#### Save and Restore TensorFlow Models
+
+- Saving Models:
+
+```python
+import tensorflow as tf
+
+# The file path to save the data
+save_file = './model.ckpt'
+
+# Two Tensor Variables: weights and bias
+weights = tf.Variable(tf.truncated_normal([2, 3]))
+bias = tf.Variable(tf.truncated_normal([3]))
+
+# Class used to save and/or restore Tensor Variables
+saver = tf.train.Saver()
+
+with tf.Session() as sess:
+    # Initialize all the Variables
+    sess.run(tf.global_variables_initializer())
+
+    # Show the values of weights and bias
+    print('Weights:')
+    print(sess.run(weights))
+    print('Bias:')
+    print(sess.run(bias))
+
+    # Save the model
+    saver.save(sess, save_file)
+```
+
+- Reload Models: 
+
+```python
+saver = tf.train.Saver()
+
+# Launch the graph
+with tf.Session() as sess:
+    saver.restore(sess, save_file)
+
+    test_accuracy = sess.run(
+        accuracy,
+        feed_dict={features: mnist.test.images, labels: mnist.test.labels})
+
+print('Test Accuracy: {}'.format(test_accuracy))
+```
+
+
+
+#### TensorFlow Dropout
+
+- Dropout is a regularization technique for reducing overfitting.  
+- This technique temporarily drops units from the network, along with all of those units' incoming and outgoing connections.
+- The  [`tf.nn.dropout()`](https://www.tensorflow.org/api_docs/python/tf/nn/dropout) function takes in two parameters:
+  - `hidden_layer`: the tensor to which you would like to apply dropout
+  - `keep_prob`: the probability of keeping (i.e. *not* dropping) any given unit. (can be used to adjust the number of units to drop) 
+  - During training, a good starting value for `keep_prob` is `0.5`
+  - During testing, use a `keep_prob`of `1.0` to keep all units and maximize the power of the model.
+
