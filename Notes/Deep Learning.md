@@ -1,7 +1,3 @@
-
-
-
-
 # Deep Learning
 
 ## Chapter 1.  Introduction to Deep Learning
@@ -1022,6 +1018,8 @@ print("Prediction accuracy: {:.3f}".format(accuracy))
 
 - [Keras Document](https://keras.io/)
 
+- **Dense Layer**: fully connected, the nodes are connected to every node in the previous layer. 
+
 - Adding layers: `model.add(Dense(128, activation="softmax", input_dim=100)))`
 
 - Models need to be compiled before it can be run: `model.compile(loss="categorical_crossentropy", optimizer="adam", metrics = ["accuracy"])` 
@@ -1263,6 +1261,422 @@ print('Test Accuracy: {}'.format(test_accuracy))
 - The  [`tf.nn.dropout()`](https://www.tensorflow.org/api_docs/python/tf/nn/dropout) function takes in two parameters:
   - `hidden_layer`: the tensor to which you would like to apply dropout
   - `keep_prob`: the probability of keeping (i.e. *not* dropping) any given unit. (can be used to adjust the number of units to drop) 
-  - During training, a good starting value for `keep_prob` is `0.5`
-  - During testing, use a `keep_prob`of `1.0` to keep all units and maximize the power of the model.
+  - You should only drop units while training the model (`keep_prob = 0.5`). 
+  - During validation or testing, keep all of the units to maximize accuracy. `keep_prob = 1.0`
+
+```python
+import tensorflow as tf
+
+hidden_layer_weights = [
+    [0.1, 0.2, 0.4],
+    [0.4, 0.6, 0.6],
+    [0.5, 0.9, 0.1],
+    [0.8, 0.2, 0.8]]
+out_weights = [
+    [0.1, 0.6],
+    [0.2, 0.1],
+    [0.7, 0.9]]
+
+# Weights and biases
+weights = [
+    tf.Variable(hidden_layer_weights),
+    tf.Variable(out_weights)]
+biases = [
+    tf.Variable(tf.zeros(3)),
+    tf.Variable(tf.zeros(2))]
+
+# Input
+features = tf.Variable([[0.0, 2.0, 3.0, 4.0], [0.1, 0.2, 0.3, 0.4], [11.0, 12.0, 13.0, 14.0]])
+
+# TODO: Create Model with Dropout
+keep_prob = tf.placeholder(tf.float32)
+hidden_layer = tf.add(tf.matmul(features, weights[0]), biases[0])
+hidden_layer = tf.nn.relu(hidden_layer)
+hidden_layer = tf.nn.dropout(hidden_layer, keep_prob)
+
+logits = tf.add(tf.matmul(hidden_layer, weights[1]), biases[1])
+
+# TODO: Print logits from a session
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    print(sess.run(logits, feed_dict={keep_prob: 0.5}))
+```
+
+
+
+## Chapter 3. Convolutional Neural Network
+
+### 3.1  AWI Instance
+
+18.223.122.5:8888/?token=d75c263f78f56729cf5ef608441c906028784be20db691c9 
+
+### 3.2 CNN
+
+#### MNIST Dataset(MLP)
+
+- 70,000 images of hand-written digits from 0 to 9, each with 28*28 = 784 pixels.
+- To feed an image to MLP (Multilayer Perceptron), we must first convert the image to a vector, which will be treated as simple vector of nums with no special structure.
+- **Load MNIST**:
+
+```python
+from keras.datasets import mnist
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+```
+
+- **Preprocess**: 
+  - feature (grayscale) from 0 to 255 -> 0 to 1 
+  - One-hot encoding labels (0 to 9) -> each label becomes a vector with 10 entries.
+- **Flatten layer**: takes the image matrix's input and convert it to a vector.
+- **Dropout layer**: minimize overfitting, provided the probability that any node is dropped during training.
+
+```python
+from keras.models import Sequential
+from keras.layers import Dense, Flatten
+
+model = Sequential()
+model.add(Flatten(input_shape = X_train.shape[1:]))
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.2))
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.2))
+model.add(Dense(10, activation='softmax'))
+
+model.summary()
+```
+
+- **Loss function**: Categorical Cross-Entropy Loss
+  - if prediction and label agree (close to each other) , it returns lower loss. If ... disagree, higher loss.
+  - good model ==> loss in accuracy decreases with training epochs.
+- **Compile**:
+
+```python
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+```
+
+- **Train**:
+
+```python
+from keras.callbacks import ModelCheckpoint
+checkpointer = ModelCheckpoint(filepath='mnist.model.best.hdf5', verbose=1, save_best_only=True)
+hist = model.fit(X_train, y_train, batch_size=128, epochs=10, validation_split=0.2, callbacks=[checkpointer], verbose=1, shuffle=True)
+```
+
+- Load the weights that got the best validation accuracy:
+
+```
+model.load_weights('mnist.model.best.hdf5')
+```
+
+- Calculate the classification accuracy on the test set:
+
+```python
+score = model.evaluate(X_test, y_test, verbose=0)
+accuracy = 100 * score[1]
+print('Test Accuracy: %.4f%%' % accuracy)
+```
+
+
+
+#### Model Validation in Keras
+
+- Seperate data: 
+
+  - **Train Set**: The model look only on train set to decide how to modify (fit) its weights;
+
+  - **Validation Set**:  At every epoch,  The model check how well the model is doing and if it's overfitting by checking its accuracy on the validation set. ( It won't use any of the validation set for back propagation step! )
+
+    --> <u>Always pick the model with the lowest validation loss (best validation accuracy).</u>
+
+    --> If training loss << validation loss, this model might overfits.
+
+  - **Test Set**: Check accuracy of the trained model.
+
+ 
+
+#### MLP vs CNN
+
+- Difference:
+  - MLP only use fully connected layers. CNN can also use sparsely connected layers. (hidden_layer)
+  - MLP only accept vector input and CNN can also accept matrices. ( CNN understand that the image pixels closer to each other are more heavily related than those far apart. )
+- Similarity:
+  - They're both composed of a stack of layers. (Input + Hidden + Output)
+  - They share the same Loss functions and optimizers to minimize loss func.
+
+
+
+#### Local Connectivity
+
+- Break the image into several regions, each hidden node will be connected to only the pixels in one of these regions and report to the output layer. Output layer combines all these findings into a prediction.   
+  - Each node only need to find pattern from a small local group of pixels.
+  - Hidden nodes within the same collection will share a common group of weights. (Different region might share the same pattern)
+- Locally connected layer uses far fewer parameters than a densely connected layer.
+- It's less likely to overfit and understands how to tease out patterns contained in the image data.
+
+![Locally-connected-layer](images/locally-connected-layer.png)
+
+
+
+#### Convolutional Layer
+
+- A stack of feature maps, one for each filter. Each filter responsible for finding a pattern in the image.
+
+- **Filter** (grid of weights) has the same size as convolutional window and can be used to discover pattern.
+  - Filters (weights, bias) in CNN are initially generated randomly, but CNN can learn filters on its own. 
+  - To increase number of nodes --> increase num of filters
+  - To increase size of the detected patterns --> increase size of the filters
+- **Stride**: the amount by which the filter slide over the image.
+- **Calculation**: `K` = `filters`, `F` = `kernel_size`, and `S` = `stride`
+  - The **depth** of the convolutional layer will always equal the number of filters `K`. 
+  - If `padding = 'same'`, then the spatial dimensions of the convolutional layer are the following:
+    - **height** = ceil(float(`H_in`) / float(`S`))
+    - **width** = ceil(float(`W_in`) / float(`S`))
+  - If `padding = 'valid'`, then the spatial dimensions of the convolutional layer are the following:
+    - **height** = ceil(float(`H_in` - `F` + 1) / float(`S`))
+    - **width** = ceil(float(`W_in` - `F` + 1) / float(`S`))
+- When the filter extends outside of the image:
+  - Just ignore those nodes --> set Padding = 'VALID' 
+  - Or padding the image edge with 0s to give the filter enough space --> set Padding = 'SAME'
+- With one filter, we can only detect one single pattern. --> multiple filters
+
+![Convolutional-Layer](images/convolutional-layer.png)
+
+- The lighter and darker color in the filter represents the pattern it detects: 
+
+![Convolutional-Layer](images/convolutional-layer-car.png)
+
+- Grayscale image ==> 2-D array,  Color image ==> 3-D array (RGB image ==> depth = 3 )
+- RGB image has 3 different channels, thus the filter also has 3 channels(a stack of three 2-D arrays)
+
+![rgb-filter](images/RGB-filter.png)
+
+- Think about each of the feature maps in a convolutional layer as an image channel and stack them to a 3-D array. Then use it as input to another convolutional layer to discover the pattern within pattern.. (we can do this again and again...)
+
+![cool](images/multi-convolutional-layer.png)
+
+Do **not** include the `input_shape` argument if the convolutional layer is *not* the first layer in your network.
+
+```python
+from keras.layers import Conv2D
+
+# create convolutional layer
+Conv2D(filters, kernel_size, strides, padding, activation='relu', input_shape)
+
+# If it's in this shape: 64 filters, each with a size of 2x2, stride=1, padding='valid'
+Conv2D(64, (2,2), activation='relu')
+```
+
+
+
+#### Pooling Layer
+
+- Often appears after convolutional layer and take convolutional layers (a stack of feature maps) as input.
+- Returns a stack of the same number of feature maps but with smaller width and height.
+  - **Non-global** pooling layer: moderate reduction in size. (window and stride) ->Max Pooling Layer
+  - **Global** ... : significant reduction in size. ->Global Average Pooling Layer(GAP layer)
+- **Max Pooling Layer**:`pool_size` is number specifying the height and width of the pooling window. `strides` will default to `pool_size`.
+
+```python
+from keras.layers import MaxPooling2D
+MaxPooling2D(pool_size, strides, padding)
+```
+
+
+
+#### Design CNN Architechture (Image Classification)
+
+- **Goal**: increase depth & decrease width and height of the input array(image).
+
+- **Layers**: Fully-connected, convolutional, pooling.
+  - Convolutional: make the array deeper when passing through the network (increase depth)
+  - Pooling: decrease spatial dimensions(width and height)
+- Input: fix-sized image. (usually resize the images to square) 
+  - RGB: 3 channels, (x, x, 3)
+  - Gray-scale: 1 channel, (x, x, 1)
+- Toy model: 
+
+![toy-model](images/CNN-image-classification.png)
+
+![toy-model](images/CNN-max-pooling.png)
+
+- Once there's no more spatial information left to discover in the image, flatten the array to a vector and feed it to one or more fully-connected layer. (to determine what is in the image)
+
+
+
+#### Image Augmentation in Keras
+
+- Variance: Scale invariance, Rotation ~ & Translation ~.
+- To achieve these variances --> Data Augmentation. (e.g. to achieve rotation variance, try rotate the image to different angle and add it into the training set)
+- This tech helps boost the performance of CNN models and can help prevent overfitting.
+- Change `model.fit() ` to `model.fit_generator()`
+
+
+
+#### Transfer Learning
+
+- Applying the existing trained model to solve different but related problems.
+- If dataset small and similar to the previous dataset --> Remove the final layers specific to the training set while keeping the earlier ones, which are usually generalized. Then add our own layer(s) to this model and train only the final layers we added(freeze the weights of other layers).  
+- If your dataset is large and very different from the previous dataset --> Remove the final specific layer. Randomly initialize the new fully layer and use the pre-trained weight for initializing other layers' weights. Then Re-train the entire network.
+- Bottleneck feature: the output of the chopped model will be the bottleneck features, which is also the input of your added layers.
+
+
+
+### 3.3 CNNs in Tensorflow
+
+- TensorFlow uses a stride for each `input` dimension, `[batch, input_height, input_width, input_channels]`.
+
+- We generally always set the stride for `batch` and `input_channels` (i.e. the first and fourth element in the `strides` array) to be `1`.  This ensures that the model uses all batches and input channels.  (*It's good practice to remove the batches or channels you want to skip from the data set rather than use a stride to skip them.*)  
+
+- You'll focus on changing `input_height` and  `input_width` (while setting `batch` and `input_channels` to 1).  The `input_height` and `input_width` strides are for striding the filter over `input`. This example code uses a stride of 2 with 5x5 filter over `input`.  I've mentioned stride as one number because you usually have a square stride where `height = width`.  When someone says they are using a stride of 2, they usually mean `tf.nn.conv2d(x, W, strides=[1, 2, 2, 1])`.
+
+- The [`tf.nn.bias_add()`](https://www.tensorflow.org/api_docs/python/tf/nn/bias_add) function adds a 1-d bias to the last dimension in a matrix.  (**Note: using tf.add() doesn't work when the tensors aren't the same shape.**)
+
+- Set up the `strides`, `padding`, filter weight (`F_w`), and filter bias (`F_b`) such that the output shape is `(1, 2, 2, 3)`
+
+  - out_height = ceil(float(in_height - filter_height + 1) / float(strides[1]))
+  - out_width  = ceil(float(in_width - filter_width + 1) / float(strides[2]))
+  - depth doesn't change during pooling operation.
+
+
+```python
+"""
+Setup the strides, padding and filter weight/bias such that
+the output shape is (1, 2, 2, 3).
+"""
+import tensorflow as tf
+import numpy as np
+
+# `tf.nn.conv2d` requires the input be 4D (batch_size, height, width, depth)
+# (1, 4, 4, 1)
+x = np.array([
+    [0, 1, 0.5, 10],
+    [2, 2.5, 1, -8],
+    [4, 0, 5, 6],
+    [15, 1, 2, 3]], dtype=np.float32).reshape((1, 4, 4, 1))
+X = tf.constant(x)
+
+
+def conv2d(input):
+    # Filter (weights and bias)
+    # The shape of the filter weight is (height, width, input_depth, output_depth)
+    # The shape of the filter bias is (output_depth,)
+    # NOTE: Remember to wrap them in `tf.Variable`, they are trainable parameters after all.
+    F_W = tf.Variable(tf.truncated_normal((2,2,1,3)))
+    F_b = tf.Variable(tf.zeros(3))
+    # Set the stride for each dimension (batch_size, height, width, depth)
+    # Or F_W=[3,3,1,3] and strides=[1,1,1,1]
+    strides = [1, 2, 2, 1]
+    # set the padding, either 'VALID' or 'SAME'.
+    padding = 'VALID'
+    # https://www.tensorflow.org/versions/r0.11/api_docs/python/nn.html#conv2d
+    # `tf.nn.conv2d` does not include the bias computation so we have to add it ourselves after.
+    return tf.nn.conv2d(input, F_W, strides, padding) + F_b
+
+out = conv2d(X)
+
+```
+
+- Max pooling layer:
+
+```python
+...
+conv_layer = tf.nn.conv2d(input, weight, strides=[1, 2, 2, 1], padding='SAME')
+conv_layer = tf.nn.bias_add(conv_layer, bias)
+conv_layer = tf.nn.relu(conv_layer)
+# apply max pooling
+conv_layer = tf.nn.max_pool(
+    conv_layer,
+    ksize=[1, 2, 2, 1],
+    strides=[1, 2, 2, 1],
+    padding='SAME')
+```
+
+
+
+### 3.4 Initialize Weights
+
+- Use the same number for weights (e.g.0 or 1) -> hard for backprop to find gradients and change weight.
+- Instead, we usually initialize weights using uniform distribution.
+- **Uniform Distribution:** `tf.random_uniform()` . a probability distribution where getting number anywhere within a certain range is equally probable. (default: 0-1)
+- **Normal Distribution**: `tf.random_normal()` mostly around 0. usually does better than random uniform.
+- Truncated Normal: `tf.truncated_normal()` , cutting off the tails and only focus on what's around 0.
+- **Rules**:
+  - Have random numbers. (like uniform distribution)
+  - Initialize it with negative numbers as well as positive numbers. 
+  - General Rule: y = 1/√n (n is number of units)
+
+
+
+### 3.5 Autoencoder
+
+- Can be Applied to: image denoising & Dimensionality Reduction
+- Having problems in: Compression & Generalizing to other datasets
+
+
+
+#### Shape of Tensor
+
+> The shape of a tensor is the number of elements in each dimension. TensorFlow automatically infers shapes during graph construction. These inferred shapes might have known or unknown rank. If the rank is known, the sizes of each dimension might be known or unknown.
+
+| Rank | Shape            | dim  | Example                                              |
+| ---- | ---------------- | ---- | ---------------------------------------------------- |
+| 0    | [ ]              | 0-D  | 0-D tensor,  scalar                                  |
+| 1    | [ D0 ]           | 1-D  | 1-D tensor can have a shape like [ 5 ]               |
+| 2    | [ D0, D1 ]       | 2-D  | 2-D 的 tensor can have a shape like [ 3, 4 ]         |
+| 3    | [ D0, D1, D2 ]   | 3-D  | 3-D 的 tensor can have a shape like [ 1, 3, 4 ]      |
+| n    | [ D0, D1, … Dn ] | n-D  | n-D 的 tensor can have a shape like [ D0, D1, … Dn ] |
+
+- Shape can be shown in Python list/ tuples, or tf.TensorShape.
+
+- **Get Tensor Shape**:
+    - `tf.Tensor.get_shape()`
+    - `tf.Tensor.shape`
+    - For example, to make a vector of zeros the same size as the number of columns in a given matrix:
+
+  ```python
+  zeros = tf.zeros(tf.shape(my_matrix)[1])
+  ```
+
+  
+
+- **Modify tensor shape**
+
+  - The **number of elements** of a tensor is the product of the sizes of all its shapes. 
+  - num of elems of a scalar is always 1.
+  - `tf.reshape` can be used to modify shape of tensor.
+
+```python
+rank_three_tensor = tf.ones([3, 4, 5])
+matrix = tf.reshape(rank_three_tensor, [6, 10])  # Reshape existing content into
+                                                 # a 6x10 matrix
+matrixB = tf.reshape(matrix, [3, -1])  #  Reshape existing content into a 3x20
+                                       # matrix. -1 tells reshape to calculate
+                                       # the size of this dimension.
+matrixAlt = tf.reshape(matrixB, [4, 3, -1])  # Reshape existing content into a
+                                             #4x3x5 tensor
+
+# Note that the number of elements of the reshaped Tensors has to match the
+# original number of elements. Therefore, the following example generates an
+# error because no possible value for the last dimension will match the number
+# of elements.
+yet_another = tf.reshape(matrixAlt, [13, 2, -1])  # ERROR!
+```
+
+- **None**:  when initializing shape, `None` keyword is often included, which means there's unknown dimension(s) needs to be decided by the input later.  
+  - **Fully-known shape**: has a known number of dimensions and a known size for each dimension. e.g. `TensorShape([16, 256])`
+  - **Partially-known shape**: has a known number of dimensions, and an unknown size for one or more dimension. e.g. `TensorShape([None, 256])`
+  - **Unknown shape**: has an unknown number of dimensions, and an unknown size in all dimensions. e.g. `TensorShape(None)`
+
+```python
+self.img = tf.placeholder(dtype= tf.float32, shape= (None, 256, 256, 3), name = 'input')
+```
+
+
+
+### Train CNN with transfer learning
+
+- Obtain bottleneck features for train, valid and test sets.
+- Create a model and add your own layers
+- Compile and Train your model, save the best model/weights.
+- Load the model with the best validation loss
+- Test the model
 
