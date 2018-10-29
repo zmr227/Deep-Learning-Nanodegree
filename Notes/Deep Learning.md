@@ -48,7 +48,6 @@
 
 - **Conda:** a package and environment manager.  
 
-  
 
 #### **General Commands**
 
@@ -76,7 +75,6 @@
 
 - **Remove environment:**  `conda env remove -n env_name`
 
-  
 
 **e.g.** Create an environment named data installed with Python 3.6, numpy, and pandas: 
 
@@ -184,8 +182,6 @@ When saving the notebook, it's written to the server as a JSON file with a .ipyn
 
 - **Notes**: leaves the cell as speaker notes.
 
-  
-
 - **Running Slideshow:**  `jupyter nbconvert notebook.ipynb --to slides` 
 
   ​					(need to serve it with an HTTP server to actually see the presentation)
@@ -233,7 +229,6 @@ When saving the notebook, it's written to the server as a JSON file with a .ipyn
 
 - **Tensors**: To create a 3x3x2x1 tensor,` t = np.array([[[[1],[2]],[[3],[4]],[[5],[6]]],[[[7],[8]],\    [[9],[10]],[[11],[12]]],[[[13],[14]],[[15],[16]],[[17],[17]]]])`  (`t.shape == (3,3,2,1) `)
 
-  
 
 #### Matrix Operations
 - **Element-wise**:  simply apply calculation on each pair of corresponding elements in the matrices. 
@@ -243,8 +238,6 @@ When saving the notebook, it's written to the server as a JSON file with a .ipyn
 - **Multiply**  (Element-wise)  : `np.multiply(array, 5)`; `array *= 5` or `np.multiply(m, n) `;  `m * n`
 
 - **Set Zero**:  `m *= 0` before you want to set all elements of matrix m to zero.
-
-  
 
 - **Matrix Product**：`np.matmul(A, B)` ( Order Matters!  A · B ≠ B · A ) 
 
@@ -261,8 +254,6 @@ When saving the notebook, it's written to the server as a JSON file with a .ipyn
   - Order matters. Multiplying A•B is not the same as multiplying B•A. 
 
   - Data in the left matrix should be arranged as rows., while data in the right matrix should be arranged as columns. 
-
-    
 
 - **Matrix Transpose**: a matrix with the same value as the original, but its rows and columns switched.
 
@@ -421,7 +412,7 @@ def softMax(L):
 
 
 
-#### Cross Entropy
+#### Cross Entropy (usually used in classification problems)
 
 - It measures how likely is it that some events happen based on given probabilities. If it's very likely to happen, then cross entropy is small. (take negative of the logarithms and sum them up)
 - Good model -- Low Cross Entropy & High Probability;  Bad Model -- High Cross Entropy & Low Possibility
@@ -618,7 +609,7 @@ def update_weights(x, y, weights, bias, learnrate):
 
 
 
-#### Mean Squared Error (MSE)
+#### Mean Squared Error (MSE, use in regression problems)
 
 - When the dataset is large, summing up all the weight steps can lead to really large updates that make the gradient descent diverge.
 - To compensate for this, we'll need to use a quite small learning rate or just divide by the number of records (m) in our dataset to take the average.
@@ -989,7 +980,7 @@ print("Prediction accuracy: {:.3f}".format(accuracy))
 4. Backpropagate to update weights, get better weights and boundary region.
 5. Repeat until it finish all batches.
 
-
+20:14:41	insert into activities (aid, name, date, acid) values (1, 'das', 2018-10-20, 121)	Error Code: 1292. Incorrect date value: '1988' for column 'Date' at row 1	0.021 sec
 
 #### Learning Rate Decay
 
@@ -1679,4 +1670,122 @@ self.img = tf.placeholder(dtype= tf.float32, shape= (None, 256, 256, 3), name = 
 - Compile and Train your model, save the best model/weights.
 - Load the model with the best validation loss
 - Test the model
+
+
+
+## Chapter 4
+
+### 4.1 Recurrent Neural Network (RNN)
+
+### RNN Introduction
+
+#### Temporal Dependency
+
+- Recurrent: repeatedly ==> RNN: perform the same task for each element in the input sequence.
+- RNN -- System with memory, 
+- Able to capture temporal dependency (change over time), previous input(s) matter. (only current input matters in CNN)
+- Application of RNN: Speech Recognition, Time Series Prediction (traffic patterns, movie selection, stock price movement and market condition), NLP (machine translation, question answering, chatbots), Gesture Recognition.
+
+#### Mini batch training
+
+- using GD, update weights once every N steps with the average value
+- Advantage: Noise Reduction & Complexity Reduction. --> learning process converge faster and more accurately.
+- Update weightss -- Chain rule.
+
+
+
+#### RNN
+
+- Train with a **sequence** of inputs since previous inputs matter.
+- **Memory** is defined as the output of hidden layer neurons, which will serve as additional input to the network during next training step. (provide feedback)
+- State Layer
+- Backpropagation through time
+
+#### Backpropagation Through Time (BPTT)
+
+- chain rule, but can only achieve short term memory.
+- can only backprop several steps like up to 8 or 10, if backprop too deep, the gradient will gradually vanish.
+- Solve Vanishing Gradient problem --> LSTM (long short term memory)
+- Solve Exploding Gradient problem --> Gradient Clipping. (set a threshold, if excceed, normalize the gradient)
+
+#### LSTM
+
+- Avoid vanishing problem & loss of info
+- Long term memory + Short term memory (LST & STM)
+
+![lstm](/Users/Xiaowen/Documents/GitHub/Deep-Learning-Nanodegree/Notes/images/LSTM-example.png)
+
+- 4 gates: forget, remember, learn, use
+  - **forget gate**: take in LTM, multiply by a forget factor(calculated by STM and event)  to decide what part to keep and what part to forget
+  - **learn gate**: take in STM & event then ignore unimportant part and keep the important part of them by multiply a ignore factor(calculated by STM and event)  (recently learned info)
+  - **Remember gate**: takes in output of forget gate and learn gate, add them. (outputs an updated LTM) --> new longterm
+  - **use gate/output gate**: takes in output of forget gate and learn gate. make prediction --> new shortterm.
+
+![LSTM-0](images/LSTM-0.png)
+
+- Decide which info to forget, which to store, and when to use it. 
+- LSTM has 3 sigmoid func. 
+  - Sigmoid can be used as filter of what info goes into / retains within the cell or passes through to the output. (e.g = 0; = 1; between 0 and 1represent different states)
+
+![lstm-cell](images/LSTM-cell.png)
+
+- Similar architectures: 
+
+  (1) Gated Recurrent Unit(GRU) combines forget and learn gate into one update gate and run it through to a combine gate and get one new memory instead of two in LSTM, 
+
+  (2) Peehole Connections: also connect the LTM into calculation of forget factor, LTM has more access into the forgetting decision.
+
+
+
+### 4.2 HyperParameters
+
+#### Learning Rate
+
+- Recommended starting point: 0.01 (usually between 0.1 and 0.000001)
+- Possible problems :
+  - If model is training but too slow --> increase the learning rate.
+  - Training error oscillation could indicate the training process is stuck in a bottleneck in the error curve before reaching the optimal value. --> reduce learning rate / use an adaptive learning rate.
+
+![learn-rate](images/learn-rate.png)
+
+- Tune learning rate:
+  -  Learning Rate Decay (decrease learn rate linearly every n eopchs)
+  - Adaptive learning rate (e.g. AdamOptimizer, AdagradOptimizer)
+
+#### Minibatch Size
+
+- Recommended starting point: 32 (usually between 32 to 256)
+  - large size --> computation boost, more memory will be required and might reduce accuracy.
+  - small size --> slow & will bring more noice in error calculation, noise can help to prevent the training process from stopping at local minima.
+
+#### Epochs
+
+- Keep training the model as long as the validation error keeps decreasing.
+- Early Stopping -- determine when to stop training the model. (suppoerted by TensorFlow)
+
+#### Num of Hidden Unit Layers
+
+- proved techs:
+  -  set the first hidden layer larger than the inputs
+  - 3 layer net outperform 2 layer net.
+  - deep nn --> the deeper they are, the better they perform.
+- The more the better, a little larger is not a problem. But too large might overfit.
+- If overfit -- training acc >> testing acc --> reduce the num of units / dropout/ L2 Regularization
+- If model don't train, add more hidden units until the validation error start to get worse.
+
+#### Embedding Size
+
+- While some tasks show reasonable performance with embedding sizes between 50-200, it's not unusual to see it go up 500 or even 1000.
+
+
+
+### 4.3 Word2Vec
+
+- onehot encoding ignores the relationship between words and causes giant computational waste since most of the results will be 0,
+- Onehot --> Distributed representation (embedding layer ==hidden layer work as a lookup table, lower dimensional)
+- Distributed:
+  - Word2Vec (skip-gram): use the input words (keyword) to predict its surrounding words (context)
+  - CBOW(Continuous Bag of Words) : predict keywords by its context.
+
+
 
