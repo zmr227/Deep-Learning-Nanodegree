@@ -1781,11 +1781,65 @@ self.img = tf.placeholder(dtype= tf.float32, shape= (None, 256, 256, 3), name = 
 
 ### 4.3 Word2Vec
 
-- onehot encoding ignores the relationship between words and causes giant computational waste since most of the results will be 0,
-- Onehot --> Distributed representation (embedding layer ==hidden layer work as a lookup table, lower dimensional)
-- Distributed:
-  - Word2Vec (skip-gram): use the input words (keyword) to predict its surrounding words (context)
+- onehot encoding ignores the relationship between words and causes giant computational waste since most of the results will be 0 --> inefficient
+- Embedding layer: onehot encode words into integers and pass them to the embedding layer, get embedded vectors.
+- Onehot --> Distributed representation (embedding layer == hidden layer work as a lookup table, lower dimensional)
+- Word2Vec:
+  -  skip-gram: use the input words (keyword) to predict its surrounding words (context)
   - CBOW(Continuous Bag of Words) : predict keywords by its context.
 
 
 
+## Chapter 5. Generative Adversarial Networks (GANs)
+
+### 5.1 How GANs Work
+
+#### GANs = Generator + Discriminator
+
+- Generator Network: 
+  - takes random noise as input, run the noise through a differentiable function to transform and reshape it to have a recognizable structure.  (choice of input noise will determine which image will be output by the generator.)
+  - Output -- a realistic image.
+  - Basic idea: show a lot of images to it and ask it to make more images that come from the same probability distribution.
+- Discriminator:
+  - A regular neural net classifier trained to output probability that the input is real. (1-real, 0-fake)
+  - During training, it's shown real data from training data half the time and fake data from generator the other half of the time.
+- Over time, discriminator becomes better at detecting generated fake data and generator becomes better at generating more realistic data to fool the discriminator.
+  - Discriminator outputs high value wherever the density of real data > density of generated data.
+  - The generator will move its samples to the areas where the model distribution is not dense enough.
+  - Eventually the generator's distribution matches the real distribution, the two densities are equal, then the discriminator will output a probability of 1/2. (perfect replica of real data)
+
+
+#### Adversarial -- game theory
+
+- Most ML models are based on optimization: pick model  parameters + cost function =>minimize cost
+- GANs different from other models bacause it requires **running two optimization algorithms simultaneously.**
+- In GAN, the generator and discriminator use the same value function. G would want to minimize the value func while D will try to maximize it. 
+- **Saddle point:** happens at a maximum for D and minimum for G. (an equilibrium occurs when neither can improve without changing the other's strategy) => local max for D occurs when it accurately estimate the probability that the input is real.
+- Although this saddle point might exist, it's hard to find.
+- Usually train GANs by running two optimizing algorithm, each minimizing one player's cost with respect to that player's parameters. (do not necessarily find the equilibrium)
+- Common failure case for GAN: when data contains multiple clusters, G will learn to generate one cluster at a time, D will learn to reject it... (preferrably sample from all clusters simultaneously)
+- Goal --> design algorithm to find equilibrium of GANs
+
+
+
+#### GANs Architecture
+
+- make sure both G & D has at least one hidden layer. (ensures both models have the universal approximate property and represent any probability distribution if given enough hidden unit)
+
+- Popular choices for GAN:
+  - Leaky ReLU (activation func for D) -- make sure the gradient can flow throught the entire architecture. (very important for GANs as G can only learn by receiving gradient from the discriminator)
+  - Hyperbolic Tangent (output activation func of G) -- data should be scale to [-1, 1]
+  - Sigmoid -- output of D needs to be a probability, use sigmoid as output to enforce this constraint.
+
+- Define a loss for G and a loss for D -> simultaneously use each optimizer to minimize the loss of G/D, 
+- Adam is a good choice for optimizer
+- Remember to use the numerically stable version of cross entropy where the loss is computed using logits. 
+-  logits -- values produced by D right before sigmoid (if use the probability value out of sigmoid, might be rounding error when the sigmoid is near 0 or 1)
+- loss = (multiply the labels (0 or 1) by a number a little smaller than 1, like 0.9,  help learning better and avoid making extreme predictions)
+  - d_loss = cross_entropy(logits, labels)
+  - g_loss = cross_entropy(logits, flipped_labels) [flipped_label means 0->1, 1->0, but don't simply use negative d_loss as g_loss]
+- Reshape (op near the start of generator) 
+  - Usually, conv net change the shape of the feature map as move throught the net.
+  - Start with a small feature map and expand it to a wide and tall image (need an op to increase the height and width of feature map at each layer)
+  - every time move the convolutional kernel by one pixel in input map, move two or more pixels in the output map.
+- Use Batch normalization in every layer except the output layer of G and input layer of D. (also apply it to all real data in one mini batch then apply batch normalization separately to another minibatch containing all generated samples)
