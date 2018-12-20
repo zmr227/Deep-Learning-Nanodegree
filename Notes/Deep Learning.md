@@ -1,3 +1,5 @@
+
+
 # Deep Learning
 
 ## Chapter 1.  Introduction to Deep Learning
@@ -1827,7 +1829,7 @@ self.img = tf.placeholder(dtype= tf.float32, shape= (None, 256, 256, 3), name = 
 - make sure both G & D has at least one hidden layer. (ensures both models have the universal approximate property and represent any probability distribution if given enough hidden unit)
 
 - Popular choices for GAN:
-  - Leaky ReLU (activation func for D) -- make sure the gradient can flow throught the entire architecture. (very important for GANs as G can only learn by receiving gradient from the discriminator)
+  - Leaky ReLU (activation func for D) -- like normal relu but with a small non-zero output for negative inputs. (make sure the gradient can flow throught the entire architecture. Very important for GANs as G can only learn by receiving gradient from the discriminator)
   - Hyperbolic Tangent (output activation func of G) -- data should be scale to [-1, 1]
   - Sigmoid -- output of D needs to be a probability, use sigmoid as output to enforce this constraint.
 
@@ -1843,3 +1845,41 @@ self.img = tf.placeholder(dtype= tf.float32, shape= (None, 256, 256, 3), name = 
   - Start with a small feature map and expand it to a wide and tall image (need an op to increase the height and width of feature map at each layer)
   - every time move the convolutional kernel by one pixel in input map, move two or more pixels in the output map.
 - Use Batch normalization in every layer except the output layer of G and input layer of D. (also apply it to all real data in one mini batch then apply batch normalization separately to another minibatch containing all generated samples)
+
+
+
+#### DCGAN (Deep Convolutional GAN)
+
+- Transpose Convolution: deep & narrow layer -> wide & flat (
+- upsampling, output size depend on the stride: with stride=2, move kernel 1 pixel in input layer, patch will move 2 pixels in output layer.
+- Size of the final image depends on the real image size.
+- Use ReLU for each layer 
+- Use batch normalization for every layer except for input layer of discriminator and output layer of generator.
+- Use leaky ReLU activation in discriminator for all layers and ReLU activation in generator for all layers except for the output which uses tanh.
+- Generator: 
+
+![DCGAN](images/DCGAN-G.png)
+
+- Discriminator: Leaky ReLU & batch normalization
+
+![DCGAN](images/DCGAN-D.png)
+
+- Relationship of input size, output size & padding: 
+
+```python3
+if padding == 'SAME':
+    input_size = output_size // stride + 1
+elif padding == 'VALID':
+    input_size = (output_size - kernel + 1) // stride + 1
+else:
+    print("wrong :3")
+```
+
+- Generator Loss usually around 2 or 3 while the discriminator loss around 0.3 when set the hyperparameters right.
+
+
+
+#### Semi-Supervised Learning
+
+- Improve the performance of a classifier using a GAN
+- Semi focus more on the discriminator instead of the generator as in GAN as it's used for the classification.
