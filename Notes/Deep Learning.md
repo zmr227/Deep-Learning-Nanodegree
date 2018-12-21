@@ -1827,26 +1827,27 @@ self.img = tf.placeholder(dtype= tf.float32, shape= (None, 256, 256, 3), name = 
 #### GANs Architecture
 
 - make sure both G & D has at least one hidden layer. (ensures both models have the universal approximate property and represent any probability distribution if given enough hidden unit)
-
+- **Inputs:** 
+  - input_real: real images comes from the dataset
+  - input_z: random noise to guide the generator
 - Popular choices for GAN:
-  - Leaky ReLU (activation func for D) -- like normal relu but with a small non-zero output for negative inputs. (make sure the gradient can flow throught the entire architecture. Very important for GANs as G can only learn by receiving gradient from the discriminator)
-  - Hyperbolic Tangent (output activation func of G) -- data should be scale to [-1, 1]
-  - Sigmoid -- output of D needs to be a probability, use sigmoid as output to enforce this constraint.
-
+  - **Leaky ReLU** (activation func for D) -- like normal relu but with a small non-zero output for negative inputs. (will always have a gradient that get passed down to the layer below. Very important for GANs as G can only learn by receiving gradient from the discriminator)
+  - **Hyperbolic Tangent** (output activation func of G) -- data should be scale to [-1, 1]
+  - **Sigmoid** -- output of D needs to be a probability, use sigmoid as output to enforce this constraint.
 - Define a loss for G and a loss for D -> simultaneously use each optimizer to minimize the loss of G/D, 
 - Adam is a good choice for optimizer
 - Remember to use the numerically stable version of cross entropy where the loss is computed using logits. 
--  logits -- values produced by D right before sigmoid (if use the probability value out of sigmoid, might be rounding error when the sigmoid is near 0 or 1)
-- loss = (multiply the labels (0 or 1) by a number a little smaller than 1, like 0.9,  help learning better and avoid making extreme predictions)
+- **logits** -- values produced by D right before sigmoid (if use the probability value out of sigmoid, might be rounding error when the sigmoid is near 0 or 1)
+- **loss** = (multiply the labels (0 or 1) by a number a little smaller than 1, like 0.9,  help learning better and avoid making extreme predictions)
   - d_loss = cross_entropy(logits, labels)
   - g_loss = cross_entropy(logits, flipped_labels) [flipped_label means 0->1, 1->0, but don't simply use negative d_loss as g_loss]
-- Reshape (op near the start of generator) 
+- **Reshape** (op near the start of generator) 
   - Usually, conv net change the shape of the feature map as move throught the net.
   - Start with a small feature map and expand it to a wide and tall image (need an op to increase the height and width of feature map at each layer)
   - every time move the convolutional kernel by one pixel in input map, move two or more pixels in the output map.
 - Use Batch normalization in every layer except the output layer of G and input layer of D. (also apply it to all real data in one mini batch then apply batch normalization separately to another minibatch containing all generated samples)
 
-
+- - 
 
 #### DCGAN (Deep Convolutional GAN)
 
@@ -1881,5 +1882,28 @@ else:
 
 #### Semi-Supervised Learning
 
-- Improve the performance of a classifier using a GAN
+- Improve the performance of a classifier using a GAN (turn D into classifier)
 - Semi focus more on the discriminator instead of the generator as in GAN as it's used for the classification.
+- Can learn from labeled/unlabeled/fake images.
+- The semi GAN should be trained to: retell the label of real image; maximize sum of the probabilities of the different real classes & reject fake images.
+
+![semi](/Users/Xiaowen/Documents/GitHub/Deep-Learning-Nanodegree/Notes/images/Semi-supervise.png)
+
+- **Feature matching**:
+  -  take some feature from a hidden layer of D and make sure the avg feature value on the training data is roughly comparable to the avg feature value on the generated data by G. 
+  - add a term to the cost function to the generator, penalizing the mean absolute error between them
+  - **don't use BN** on this layer as BN will subtract the mean of each feature and then add a bias, finally all the feature values will have the same particular mean.
+  - Use **weight normalization**.
+  - **axis**: 0 --> batch, 1 --> height, 2 --> width, 3 --> channels of the feature map.
+  - features = `tf.reduce_mean()`
+  - class_logits = `tf.layers.dense(features, num_class + extra_class)` (softmax will normalize itself and have its outputs sum to 1)
+
+- **Label-mask**:
+  -  specify which of the samples are allowed to use label. (all data contain labels and semi-GAN should be trained on some unlabeled images)
+  - 0 -- ignore label, 1 -- labeled
+- To reduce the size of the feature maps, use convolution with stride of 2 instead of pooling.
+
+- Use **dropout** more often in the D:
+  - dropout is regularization tech, make sure that test error is not too much higher than training error of classifier
+  - If the dataset is small, it's more important to prevent overfit.
+- Probability of image being real = sum over all probabilities of the real classes
