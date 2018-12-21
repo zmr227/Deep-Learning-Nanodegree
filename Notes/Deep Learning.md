@@ -1907,3 +1907,17 @@ else:
   - dropout is regularization tech, make sure that test error is not too much higher than training error of classifier
   - If the dataset is small, it's more important to prevent overfit.
 - Probability of image being real = sum over all probabilities of the real classes
+
+
+
+## Chapter 6. Reinforcement Learning
+
+### 6.1 Intro to RL
+
+-  **General Idea** --> Learning from interaction
+- **Goal** --> Maximize total reward (short-term or long-term)
+- **Exploration-Exploitation Dilemma:** 
+  - Exploring potential hypothesis for how to choose actions?
+  - OR
+  - Exploiting limited knowledge about what is already known should work well?
+- **Application**: play vedio games, robotic, self-driving, finance... (ALphaGo)
