@@ -1887,7 +1887,7 @@ else:
 - Can learn from labeled/unlabeled/fake images.
 - The semi GAN should be trained to: retell the label of real image; maximize sum of the probabilities of the different real classes & reject fake images.
 
-![semi](/Users/Xiaowen/Documents/GitHub/Deep-Learning-Nanodegree/Notes/images/Semi-supervise.png)
+![semi](images/Semi-supervise.png)
 
 - **Feature matching**:
   -  take some feature from a hidden layer of D and make sure the avg feature value on the training data is roughly comparable to the avg feature value on the generated data by G. 
@@ -1914,10 +1914,52 @@ else:
 
 ### 6.1 Intro to RL
 
--  **General Idea** --> Learning from interaction
-- **Goal** --> Maximize total reward (short-term or long-term)
+-  **Reinforcement**: stimulus delivered after behavior to make that behavior more likely to occur in the future.
+
+- **General Idea** --> **Agent** learning from **interaction** with **Environment**
+  - Agent observe situation (**state**) of the environment --> S
+  - Agent select an appropriate **action** in response --> A
+  - Environment present a new situation and give a **reward** to the agent --> R
+- **Goal** --> Maximize <u>expected cumulative reward</u> (short-term or long-term)
 - **Exploration-Exploitation Dilemma:** 
   - Exploring potential hypothesis for how to choose actions?
   - OR
   - Exploiting limited knowledge about what is already known should work well?
 - **Application**: play vedio games, robotic, self-driving, finance... (ALphaGo)
+
+
+
+### 6.2 RL Framework
+
+#### Episodic & Continuing
+
+- **Episodic task**: Interaction ends at some time step T. 
+  - Task with well-defined ending points.
+  - **Rewards** given <u>only</u> at the end point, agent can learn from its previous lives.
+  - **Episode**: a complete sequence of interaction from start to finish.
+- **Continuing task**: interaction continues without limit
+  - No ending point, agent learn while interacting with the enironment simultaneously.
+  - e.g. buy and sell stock
+
+
+
+#### Goals & Rewards
+
+- **Reward Hypothesis**: all **goals** can be framed as the maximization of expected cumulative reward.
+
+- Reward in <u>teaching robot to walk</u>: agent(robot) has to balance all these requirements to maximize its expected future rewards (G) by prediction or estimate.
+
+![robot-walk](images/robot-walk-reward.png)
+
+- **Discounted Return**:
+  - At each time step T, the agent picks A to maximize (expected) G.
+  - Use discount to avoid looking too far into the limitless future, especially in continuing tasks.
+  - Care more about immediate rewards than rewards that received further in the future.
+  - The larger/smaller you set gamma, the more the agent care about the distant/immediate future.
+
+![discounted-return](images/discounted-return.png)
+
+
+
+#### MDPs
+
