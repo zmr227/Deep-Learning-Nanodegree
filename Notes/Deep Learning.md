@@ -1933,8 +1933,9 @@ else:
 
 #### Episodic & Continuing
 
+- A **task** is an instance of the reinforcement learning (RL) problem.
 - **Episodic task**: Interaction ends at some time step T. 
-  - Task with well-defined ending points.
+  - Task with well-defined starting and ending points.
   - **Rewards** given <u>only</u> at the end point, agent can learn from its previous lives.
   - **Episode**: a complete sequence of interaction from start to finish.
 - **Continuing task**: interaction continues without limit
@@ -1946,20 +1947,34 @@ else:
 #### Goals & Rewards
 
 - **Reward Hypothesis**: all **goals** can be framed as the maximization of expected cumulative reward.
+- The **return at time step t** is G_t = R{t+1} + R{t+2} + R{t+3} + …
 
-- Reward in <u>teaching robot to walk</u>: agent(robot) has to balance all these requirements to maximize its expected future rewards (G) by prediction or estimate.
+- Reward in ***teaching robot to walk*:** agent(robot) has to balance all these requirements to maximize its expected future rewards (G) by prediction or estimate.
 
 ![robot-walk](images/robot-walk-reward.png)
 
 - **Discounted Return**:
-  - At each time step T, the agent picks A to maximize (expected) G.
+  - At each time step T, the agent picks an action A from its action space to maximize (expected) G.
   - Use discount to avoid looking too far into the limitless future, especially in continuing tasks.
-  - Care more about immediate rewards than rewards that received further in the future.
-  - The larger/smaller you set gamma, the more the agent care about the distant/immediate future.
+  - Care more about **immediate rewards** than rewards that received further in the future.
+  - The larger/smaller you set **gamma**, the more the agent care about the distant/immediate future.
 
 ![discounted-return](images/discounted-return.png)
 
 
 
-#### MDPs
+#### MDPs (**Markov Decision Process**)
 
+- It's a memoryless random process. "The future is independent of the past given the present"
+-  provides a mathematical framework for modeling [decision making](https://en.wikipedia.org/wiki/Decision_making) in situations where outcomes are partly [random](https://en.wikipedia.org/wiki/Randomness#In_mathematics) and partly under the control of a decision maker. 
+- In RL, a **finite MDP** is defined by:
+
+![MDP](images/MDP.png)
+
+#### Notes
+
+- In general, the state space **S** is the set of **all nonterminal states**.
+- In continuing tasks (like the recycling task detailed in the video), this is equivalent to the set of **all states**.
+- In episodic tasks, we use **S+** to refer to the set of **all states, including terminal states**.
+- The action space **A** is the set of possible actions available to the agent.
+- In event that there are some states where only a subset of the actions are available, we use **A(s)** to refer to the set of actions available in state s∈S.
