@@ -806,7 +806,6 @@ def sigmoid(x):
     """
     return 1 / (1 + np.exp(-x))
 
-
 # Hyperparameters
 n_hidden = 2  # number of hidden units
 epochs = 900
@@ -1039,7 +1038,6 @@ print("Prediction accuracy: {:.3f}".format(accuracy))
   
   ````
 
-- Training 
 
 #### Keras Optimizers: 
 
@@ -1978,3 +1976,7 @@ else:
 - In episodic tasks, we use **S+** to refer to the set of **all states, including terminal states**.
 - The action space **A** is the set of possible actions available to the agent.
 - In event that there are some states where only a subset of the actions are available, we use **A(s)** to refer to the set of actions available in state s∈S.
+
+
+
+### 6.3 
