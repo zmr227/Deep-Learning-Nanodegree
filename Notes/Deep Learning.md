@@ -1043,7 +1043,6 @@ print("Prediction accuracy: {:.3f}".format(accuracy))
 
 - [document](https://keras.io/optimizers/), [related blog post](http://ruder.io/optimizing-gradient-descent/index.html#rmsprop)
 - **SGD**: Stochastic Gradient Descent. It uses the following parameters:
-
   - Learning rate.
   - Momentum (This takes the weighted average of the previous steps, in  order to get a bit of momentum and go over bumps, as a way to not get  stuck in local minima).
   - Nesterov Momentum (This slows down the gradient when i
@@ -1980,3 +1979,26 @@ else:
 
 
 ### 6.3 
+
+#### Policy (π)
+
+- **Deterministic Policy:** a mapping π : S --> A 
+  - input: State; 
+  - output: Action
+- **Stocastic Policy** π: allows agent to choose actions randomly. S × A --> [0, 1]
+  - π(a|s) = P(A = a | S = s)
+  - input: state S & action A
+  - output: Probability that the agent takes action a while in state S.
+
+![policy](images/policy.png)
+
+#### State-value function
+
+- For each state, yield the expected return. If the agent started in that state, and then followed the policy for all time steps.
+- Value of each state = immediate reward + discounted value of the state that follows
+
+![state-value](images/state-value func.png)
+
+- **Bellman Expectation Equation**:
+
+![bellman](images/bellman.png)
