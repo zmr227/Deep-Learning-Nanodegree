@@ -1,5 +1,3 @@
-
-
 # Deep Learning
 
 ## Chapter 1.  Introduction to Deep Learning
@@ -2002,3 +2000,35 @@ else:
 - **Bellman Expectation Equation**:
 
 ![bellman](images/bellman.png)
+
+#### Optimality
+
+- One policy is better than another: π >= π'
+- **Optimal Policy** 
+  - is guarenteed to exist, but may not be unique.
+  - is the solution to the MDP and the best streategy to accomplish its goal.
+  - **Optimal state value** -- v*
+
+![opt-policy](images/optimal-policy.png)
+
+#### Action-value Func
+
+- For each state and action, the action-value func yields the expected discounted return if the agent starts in this state and take this action, then follows the policy for all future time steps.
+
+![act-value](images/action-value.png)
+
+![example](images/action-value2.png)
+
+- **Optimal action-value function** -- q*
+
+- ***vπ(s)=qπ(s,π(s))*** holds for all s∈S
+
+
+
+#### Optimal Policy
+
+- Main Idea:
+  - Agent interact with environment
+  - From the interaction, agent estimate the optimal action-value function
+  - Agent use this function to optimalize policy (**always picking the action with the highest value**)
+
