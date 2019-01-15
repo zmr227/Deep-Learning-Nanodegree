@@ -2020,6 +2020,7 @@ else:
 ![example](images/action-value2.png)
 
 - **Optimal action-value function** -- q*
+  - All optimal policies have the same action-value function q*, the **optimal action-value function**.
 
 - ***vπ(s)=qπ(s,π(s))*** holds for all s∈S
 
@@ -2032,3 +2033,22 @@ else:
   - From the interaction, agent estimate the optimal action-value function
   - Agent use this function to optimalize policy (**always picking the action with the highest value**)
 
+- Once the agent determines the optimal action-value function q* , it can quickly obtain an optimal policy π* by setting **π* (s) =argmax(a∈A(s)) q* (s,a).**
+
+
+
+### Dynamic Programming
+
+#### Introduction
+- In the dynamic programming setting, the agent has full knowledge of the MDP. 
+- This is much easier than the reinforcement learning setting, where the agent initially knows nothing about how the environment decides state and reward and must learn entirely from interaction how to select actions.
+
+#### Iterative Method
+
+- In order to obtain the state-value function Vπ corresponding to a policy π, we need only solve the system of equations of the Bellman expectation for Vπ.
+- State space can be large and solving bellman equation can be difficult --> Iterative will help
+- Use Bellman equation in an update rule:
+  - Update a guess with guesses
+  - Iterat
+
+![image](images/iterate-method.png)
