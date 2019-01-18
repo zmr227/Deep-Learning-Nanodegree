@@ -1976,7 +1976,7 @@ else:
 
 
 
-### 6.3 
+### 6.3 RL Framework
 
 #### Policy (π)
 
@@ -2037,7 +2037,7 @@ else:
 
 
 
-### Dynamic Programming
+### 6.4  Dynamic Programming
 
 #### Introduction
 - In the dynamic programming setting, the agent has full knowledge of the MDP. 
@@ -2048,7 +2048,12 @@ else:
 - In order to obtain the state-value function Vπ corresponding to a policy π, we need only solve the system of equations of the Bellman expectation for Vπ.
 - State space can be large and solving bellman equation can be difficult --> Iterative will help
 - Use Bellman equation in an update rule:
+  - Set initial guess of each state to 0.
   - Update a guess with guesses
-  - Iterat
+  - Iteratively update each value, this method will finally come up with some reasonable guesses.
+
+![iter](images/iter-value-func.png)
 
 ![image](images/iterate-method.png)
+
+- 
