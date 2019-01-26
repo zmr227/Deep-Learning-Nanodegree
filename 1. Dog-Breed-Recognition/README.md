@@ -9,7 +9,7 @@ This Convolutional Neural Networks (CNN) model accepts user-supplied images as i
 
 ##  Summary
 
-- **HTML Version**:  [Dog-breed-recognition.html](dog_app.html)
+- **Source File**:  [Dog-breed-recognition.ipynb](dog_app.ipynb)
 - **Detectors**
   - Human faces: OpenCV's implementation of Haar feature-based cascade classifiers
   - Dog images: ResNet-50
