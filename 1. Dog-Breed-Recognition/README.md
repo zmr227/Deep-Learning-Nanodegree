@@ -1,15 +1,15 @@
-## Project: Dog Breed Recognition
+# Project: Dog Breed Recognition
 
-### Overview
+## Overview
 
 This Convolutional Neural Networks (CNN) model accepts user-supplied images as input:
 
 - If a dog is detected in the input image, it provides an estimate of the dog's breed.
 - If a human is detected, it will provide an estimate of the dog breed that is most resembling.
 
-###  Summary
+##  Summary
 
--  [Dog-breed-recognition.html](dog_app.html)
+- **Source File**:  [Dog-breed-recognition.ipynb](dog_app.ipynb)
 - **Detectors**
   - Human faces: OpenCV's implementation of Haar feature-based cascade classifiers
   - Dog images: ResNet-50
@@ -18,19 +18,23 @@ This Convolutional Neural Networks (CNN) model accepts user-supplied images as i
   - Transfer learning with VGG-16 model: 41.7464%
   - Transfer learning with ResNet-50 model: 80.0239%
 - **Predictions**
-  - **Dogs**![res1](images/res1.png)
-  - ![res2](images/res2.png)
-  - **Human**![res3](images/res3.png)
+  - **Dogs**
+  
+  ![res1](images/res1.png) 
+  ![res2](images/res2.png)
+  
+  - **Human**
+  
+  ![res3](images/res3.png)
+  
+  - **Others**
+  
+  ![res4](images/res4.png)
 
 
+## Project Instructions
 
-  - **Others**![res4](images/res4.png)
-
-
-
-### Project Instructions
-
-#### Datasets
+### Datasets
 
 - Download the [dog dataset](https://s3-us-west-1.amazonaws.com/udacity-aind/dog-project/dogImages.zip). Unzip the folder and place it at location `path/to/dog-project/dogImages`.
 - Download the  [human dataset](https://s3-us-west-1.amazonaws.com/udacity-aind/dog-project/lfw.zip). Unzip the folder and place it at location `path/to/dog-project/lfw`. 
@@ -38,7 +42,7 @@ This Convolutional Neural Networks (CNN) model accepts user-supplied images as i
 
 
 
-#### Install
+### Install
 
 - This project requires **Python, TensorFlow, Keras** and the following libraries and tools installed:
 
@@ -73,7 +77,7 @@ This Convolutional Neural Networks (CNN) model accepts user-supplied images as i
 
 
 
-#### Run
+### Run
 
 Run the following command in terminal or command window to execute the project file.
 
