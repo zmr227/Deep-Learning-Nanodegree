@@ -9,9 +9,9 @@ This project generates TV Scripts using **LSTM** **network** (RNN composed of Lo
 
 ## Summary
 
-- **Source File**:  [TV-Script-Generation](dlnd_tv_script_generation.ipynb)
+- **Source File**:  [TV-Script-Generation.ipynb](dlnd_tv_script_generation.ipynb)
 
-- **Results**:
+- **Generated Scripts**:
 
   ![generated-scripts](images/script.png)
 
@@ -45,9 +45,9 @@ This project generates TV Scripts using **LSTM** **network** (RNN composed of Lo
 
 ### Run
 
-Run the following command in terminal or command window to execute the project file.
+- Run the following command in terminal or command window to execute the project file.
 
-```
-jupyter notebook dlnd_tv_script_generation.ipynb
-```
+  ```
+  jupyter notebook dlnd_tv_script_generation.ipynb
+  ```
 
