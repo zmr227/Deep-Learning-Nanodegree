@@ -12,7 +12,7 @@ This project uses generative adversarial networks (**GANs**) to generate new ima
 
 - **Source file**:  [Face-Generation.ipynb](dlnd_face_generation.ipynb)
 
-- **Losses**
+- **Results**
 
   - **MNIST** dataset:  Discriminator Loss: 1.1952,  Generator Loss: 0.7601
 
