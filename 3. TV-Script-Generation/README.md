@@ -9,9 +9,19 @@ This project generates TV Scripts using **LSTM** **network** (RNN composed of Lo
 
 ## Summary
 
-- **Source File**:  [TV-Script-Generation.ipynb](dlnd_tv_script_generation.ipynb)
-
-- **Generated Scripts**:
+### Source File
+- [TV-Script-Generation.ipynb](dlnd_tv_script_generation.ipynb)
+### Content
+- **Preprocess Data**  
+  - Lookup Table
+  - Tokenize Punctuation
+- **Build RNN Model**
+  - Stack one or more BasicLSTMCells in a MultiRNNCell
+  - Word Embedding
+  - Build the network and divide input and targets into batches
+- **Network Training**
+ 
+- **Generated TV Scripts:**
 
   ![generated-scripts](images/script.png)
 
