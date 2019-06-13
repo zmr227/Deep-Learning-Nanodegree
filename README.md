@@ -1,4 +1,6 @@
 # Deep-Learning-Nanodegree 
+Projects of Udacity Deep Learning Nanodegree.
+
 ## Projects
 1. [Dog Breed Recognition](1.%20Dog-Breed-Recognition)
 2. [Face Generation](2.%20Face-Generation)
